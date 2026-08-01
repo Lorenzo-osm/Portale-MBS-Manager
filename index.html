@@ -5057,7 +5057,7 @@ function renderRegoleSconto() {
     container.innerHTML = '<p style="font-size:0.8rem;color:var(--testo-muted);">Nessuna regola configurata.</p>';
     return;
   }
-  container.innerHTML = aziende.map(az => {
+  container.innerHTML = aziende.map((az, aidx) => {
     const posizioni = regole[az].posizioni || [];
     const posizioniHtml = posizioni.map((p, pi) =>
       `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
@@ -5065,19 +5065,19 @@ function renderRegoleSconto() {
         <span style="font-size:0.78rem;color:var(--testo-muted);">€</span>
         <input type="number" value="${p}" min="0" step="50"
           style="background:var(--input-bg);border:1px solid var(--input-border);color:var(--testo-chiaro);padding:5px 10px;border-radius:6px;width:90px;font-size:0.85rem;outline:none;"
-          onchange="aggiornaPosizioneRegola('${escHtml(az)}',${pi},this.value)">
-        <button onclick="rimuoviPosizioneRegola('${escHtml(az)}',${pi})"
+          onchange="aggiornaPosizioneRegola(${aidx},${pi},this.value)">
+        <button onclick="rimuoviPosizioneRegola(${aidx},${pi})"
           style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:1rem;line-height:1;" title="Rimuovi posizione">✕</button>
       </div>`
     ).join('');
     return `<div style="background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:14px 18px;margin-bottom:10px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
         <strong style="color:var(--testo-chiaro);font-size:0.9rem;">${escHtml(az)}</strong>
-        <button onclick="rimuoviRegolaAzienda('${escHtml(az)}')"
+        <button onclick="rimuoviRegolaAzienda(${aidx})"
           style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:0.78rem;">Rimuovi regola</button>
       </div>
       ${posizioniHtml}
-      <button onclick="aggiungiPosizioneRegola('${escHtml(az)}')"
+      <button onclick="aggiungiPosizioneRegola(${aidx})"
         style="background:none;border:1px dashed var(--input-border);color:var(--testo-muted);padding:4px 12px;border-radius:6px;font-size:0.78rem;cursor:pointer;margin-top:4px;">
         + Aggiungi posizione
       </button>
@@ -5098,7 +5098,9 @@ function aggiungiRegolaAzienda() {
   toast('Regola sconto aggiunta per: ' + az);
 }
 
-function rimuoviRegolaAzienda(az) {
+function rimuoviRegolaAzienda(aidx) {
+  const az = Object.keys(state.regoleSconto || {})[aidx];
+  if (!az) return;
   if (!confirm('Rimuovere la regola sconto per "' + az + '"?')) return;
   delete state.regoleSconto[az];
   save();
@@ -5106,8 +5108,9 @@ function rimuoviRegolaAzienda(az) {
   toast('Regola rimossa');
 }
 
-function aggiungiPosizioneRegola(az) {
-  if (!state.regoleSconto || !state.regoleSconto[az]) return;
+function aggiungiPosizioneRegola(aidx) {
+  const az = Object.keys(state.regoleSconto || {})[aidx];
+  if (!az || !state.regoleSconto[az]) return;
   const pos = state.regoleSconto[az].posizioni;
   const ultimo = pos.length > 0 ? pos[pos.length - 1] : 800;
   pos.push(Math.max(0, ultimo - 100));
@@ -5115,15 +5118,17 @@ function aggiungiPosizioneRegola(az) {
   renderRegoleSconto();
 }
 
-function rimuoviPosizioneRegola(az, idx) {
-  if (!state.regoleSconto || !state.regoleSconto[az]) return;
+function rimuoviPosizioneRegola(aidx, idx) {
+  const az = Object.keys(state.regoleSconto || {})[aidx];
+  if (!az || !state.regoleSconto[az]) return;
   state.regoleSconto[az].posizioni.splice(idx, 1);
   save();
   renderRegoleSconto();
 }
 
-function aggiornaPosizioneRegola(az, idx, val) {
-  if (!state.regoleSconto || !state.regoleSconto[az]) return;
+function aggiornaPosizioneRegola(aidx, idx, val) {
+  const az = Object.keys(state.regoleSconto || {})[aidx];
+  if (!az || !state.regoleSconto[az]) return;
   state.regoleSconto[az].posizioni[idx] = parseFloat(val) || 0;
   save();
 }
