@@ -2243,6 +2243,9 @@
     </details>
 
     <div class="filtri-iscritti no-print" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
+      <input type="text" id="filtro-ricerca" placeholder="&#128269; Cerca per nome, cognome o azienda..."
+        style="background:var(--input-bg);border:1px solid var(--input-border);color:var(--testo-chiaro);padding:8px 12px;border-radius:6px;font-size:0.82rem;outline:none;min-width:240px;flex:1;"
+        oninput="onFiltroIscrittiChange()">
       <select class="td-select" id="filtro-partner" style="min-width:180px;" onchange="onFiltroIscrittiChange()">
         <option value="">Tutti i Partner</option>
       </select>
@@ -2691,6 +2694,13 @@ function renderAzienda(container, pi, ci, ai) {
         onchange="updateAziendaPM(${pi},${ci},${ai},this.value)">
         ${pmOptionsHtml(az.pm)}
       </select>
+      <div style="display:flex;align-items:center;gap:4px;" title="Quota minima personalizzata per questa azienda (vale per tutte le edizioni future finché non la cambi)">
+        <span style="font-size:0.72rem;color:var(--testo-muted);">&euro;</span>
+        <input type="number" min="0" step="50" class="td-input" style="width:80px;font-size:0.75rem;"
+          placeholder="${QUOTA_BASE_DEFAULT}"
+          value="${(az.quotaMinima !== undefined && az.quotaMinima !== null) ? az.quotaMinima : ''}"
+          onchange="updateAziendaQuotaMinima(${pi},${ci},${ai},this.value)">
+      </div>
       <button class="btn btn-ghost" style="padding:3px 8px;font-size:0.72rem;color:var(--accento);border-color:rgba(179,69,140,0.3);" onclick="togglePersoneAzienda(${pi},${ci},${ai})">
         &#128100; ${az.persone.length > 0 ? az.persone.length + ' pers.' : 'Persone'}
       </button>
@@ -2997,7 +3007,7 @@ function autoPopulateFromPersone() {
               esercizio: '',
               programmazione: '',
               corsoSuccessivo: '',
-              quota: undefined,
+              quota: null,
               pm: az.pm || ''
             });
             added++;
@@ -3027,7 +3037,7 @@ function autoPopulateFromPersone() {
               esercizio: '',
               programmazione: '',
               corsoSuccessivo: '',
-              quota: undefined,
+              quota: null,
               pm: ''
             });
             added++;
@@ -3052,6 +3062,14 @@ function renderIscritti() {
   let edIscritti = edIscrittiTutti;
   if (filtroPartnerAttivo) edIscritti = edIscritti.filter(i => i.partner === filtroPartnerAttivo);
   if (filtroConsulenteAttivo) edIscritti = edIscritti.filter(i => i.consulente === filtroConsulenteAttivo);
+  if (filtroRicercaAttivo) {
+    edIscritti = edIscritti.filter(i => {
+      const nome = (i.nome || '').toLowerCase();
+      const cognome = (i.cognome || '').toLowerCase();
+      const azienda = (i.azienda || '').toLowerCase();
+      return nome.includes(filtroRicercaAttivo) || cognome.includes(filtroRicercaAttivo) || azienda.includes(filtroRicercaAttivo);
+    });
+  }
 
   tbody.innerHTML = '';
 
@@ -4199,6 +4217,18 @@ function syncDebriefing() {
 
 let _debriefingEdizione = null;
 
+function filtraDebriefingRicerca() {
+  const input = document.getElementById('debriefing-search');
+  const term = input ? input.value.trim().toLowerCase() : '';
+  document.querySelectorAll('#debriefing-tbody tr').forEach(tr => {
+    if (!term) { tr.style.display = ''; return; }
+    const cells = tr.querySelectorAll('td');
+    if (cells.length < 3) { tr.style.display = 'none'; return; }
+    const testo = (cells[0].textContent + ' ' + cells[1].textContent + ' ' + cells[2].textContent).toLowerCase();
+    tr.style.display = testo.includes(term) ? '' : 'none';
+  });
+}
+
 function renderDebriefing() {
   const edizioneSelezionata = _debriefingEdizione || state.edition;
   _debriefingEdizione = edizioneSelezionata;
@@ -4290,6 +4320,12 @@ function renderDebriefing() {
       <select class="td-select" style="min-width:180px;" onchange="changeDebriefingEdizione(this.value)">
         ${opzioniEdizioni}
       </select>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:5px;flex:1;min-width:220px;">
+      <label style="font-size:0.7rem;color:var(--testo-muted);letter-spacing:0.08em;text-transform:uppercase;">Cerca</label>
+      <input type="text" id="debriefing-search" placeholder="&#128269; Nome, cognome o azienda..."
+        oninput="filtraDebriefingRicerca()"
+        style="background:var(--input-bg);border:1px solid var(--input-border);color:var(--testo-chiaro);padding:8px 12px;border-radius:6px;font-size:0.82rem;outline:none;">
     </div>
     <div style="display:flex;align-items:center;gap:8px;font-size:0.78rem;color:var(--testo-muted);margin-top:14px;">
       <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--success);flex-shrink:0;"></span>
@@ -4975,13 +5011,30 @@ function parseEdizione(ed) {
   return anno * 12 + (mese >= 0 ? mese : 0);
 }
 
+const QUOTA_BASE_DEFAULT = 1000;
+
+function getAziendaObj(nomeAzienda) {
+  let found = null;
+  state.partners.forEach(partner => {
+    partner.consulenti.forEach(cons => {
+      cons.aziende.forEach(az => {
+        if (az.name === nomeAzienda) found = az;
+      });
+    });
+  });
+  return found;
+}
+
 function calcolaQuotaDefault(isc) {
-  if (!state.regoleSconto) return 1000;
+  const azObj = getAziendaObj(isc.azienda);
+  const quotaBase = (azObj && azObj.quotaMinima !== undefined && azObj.quotaMinima !== null && azObj.quotaMinima !== '')
+    ? parseFloat(azObj.quotaMinima) : QUOTA_BASE_DEFAULT;
+  if (!state.regoleSconto) return quotaBase;
   const regola = state.regoleSconto[isc.azienda];
-  if (!regola || !regola.posizioni || regola.posizioni.length === 0) return 1000;
+  if (!regola || !regola.posizioni || regola.posizioni.length === 0) return quotaBase;
   const compagni = (state.iscritti || []).filter(i => i.edition === isc.edition && i.azienda === isc.azienda);
   const mioIdx = compagni.findIndex(i => i.id === isc.id);
-  if (mioIdx < 0) return 1000;
+  if (mioIdx < 0) return quotaBase;
   const pos = regola.posizioni;
   return pos[mioIdx] !== undefined ? pos[mioIdx] : pos[pos.length - 1];
 }
@@ -5150,6 +5203,12 @@ function updateAziendaPM(pi, ci, ai, val) {
   save();
 }
 
+function updateAziendaQuotaMinima(pi, ci, ai, val) {
+  const az = state.partners[pi].consulenti[ci].aziende[ai];
+  az.quotaMinima = (val === '' || val === null) ? null : parseFloat(val);
+  save();
+}
+
 
 // --- Supervisore assegnato (dalle Disposizioni Banchi) ---
 function getSupervisoreReport(isc) {
@@ -5215,6 +5274,7 @@ function rimuoviPM(idx) {
 // ===== FUNZIONALITA' 4: FILTRI REGISTRO ISCRITTI =====
 let filtroPartnerAttivo = '';
 let filtroConsulenteAttivo = '';
+let filtroRicercaAttivo = '';
 
 function popolaFiltriIscritti(list) {
   const selP = document.getElementById('filtro-partner');
@@ -5229,6 +5289,8 @@ function popolaFiltriIscritti(list) {
 function onFiltroIscrittiChange() {
   filtroPartnerAttivo = document.getElementById('filtro-partner').value;
   filtroConsulenteAttivo = document.getElementById('filtro-consulente').value;
+  const ricercaEl = document.getElementById('filtro-ricerca');
+  filtroRicercaAttivo = ricercaEl ? ricercaEl.value.trim().toLowerCase() : '';
   renderIscritti();
 }
 </script>
