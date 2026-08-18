@@ -1700,6 +1700,133 @@
     body.print-fogliettini .fogliettini-empty-state { display: none !important; }
   }
 
+  /* ===== STATISTICHE: GRAFICO MENSILE ===== */
+  .stat-grafico-panel {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 22px 24px;
+    margin-bottom: 28px;
+    backdrop-filter: blur(6px);
+  }
+  .stat-grafico-panel-title {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--testo-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .stat-grafico-panel-title::before {
+    content: '';
+    width: 3px; height: 14px;
+    background: var(--accento);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .stat-grafico-card {
+    background: rgba(8,35,91,0.5);
+    border: 1px solid rgba(179,69,140,0.2);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 16px;
+  }
+  .stat-grafico-card-hdr {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--testo-chiaro);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .stat-mesi-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .stat-mese-cell { display: flex; flex-direction: column; gap: 3px; }
+  .stat-mese-lbl {
+    font-size: 0.63rem;
+    color: var(--testo-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    text-align: center;
+  }
+  .stat-mese-inp {
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--testo-chiaro);
+    padding: 5px 4px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    text-align: center;
+    outline: none;
+    width: 100%;
+    font-family: inherit;
+    transition: border-color 0.2s;
+  }
+  .stat-mese-inp:focus { border-color: var(--accento); }
+  .stat-anni-ckbs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+  .stat-anno-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 3px 10px;
+    transition: all 0.2s;
+    user-select: none;
+    color: var(--testo-muted);
+  }
+  .stat-anno-pill.attivo {
+    background: var(--accento-light);
+    border-color: var(--accento-border);
+    color: var(--testo-chiaro);
+  }
+  .stat-anno-dot-sm { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .stat-canvas-wrap { position: relative; width: 100%; overflow: hidden; }
+  .stat-canvas-wrap canvas { display: block; width: 100%; }
+  .stat-tooltip {
+    position: absolute;
+    background: rgba(8,35,91,0.97);
+    border: 1px solid var(--accento-border);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 0.78rem;
+    color: var(--testo-chiaro);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.12s;
+    white-space: nowrap;
+    z-index: 20;
+    transform: translate(-50%, -100%);
+  }
+  .stat-tooltip.vis { opacity: 1; }
+  .stat-incr-row {
+    font-size: 0.75rem;
+    color: var(--testo-muted);
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .stat-incr-pos { color: #3dbf8a; }
+  .stat-incr-neg { color: #e05555; }
+
   /* ===== RESPONSIVE ===== */
   @media (max-width: 600px) {
     .home-nav-cards { flex-direction: column; }
@@ -2187,6 +2314,264 @@
   #auth-modal-overlay.show .auth-modal-box { transform: translateY(0); }
   .auth-modal-title { font-size: 1rem; font-weight: 800; color: var(--testo-chiaro); margin-bottom: 8px; }
   .auth-modal-msg   { font-size: 0.85rem; color: var(--testo-muted); line-height: 1.5; margin-bottom: 22px; }
+
+  /* ===== PAGE ORGANIGRAMMA ===== */
+  .org-layout {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  @media (max-width: 860px) {
+    .org-layout { grid-template-columns: 1fr; }
+  }
+
+  .org-form-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 24px 22px;
+    backdrop-filter: blur(6px);
+    position: sticky;
+    top: 78px;
+  }
+
+  .org-form-title {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--testo-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .org-form-title::before {
+    content: '';
+    width: 3px; height: 14px;
+    background: var(--accento);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .org-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .org-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--testo-muted);
+  }
+  .org-input, .org-select {
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--testo-chiaro);
+    padding: 9px 13px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    outline: none;
+    width: 100%;
+    font-family: inherit;
+    transition: border-color 0.2s;
+  }
+  .org-input:focus, .org-select:focus { border-color: var(--accento); }
+  .org-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23b3458c' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 34px;
+    cursor: pointer;
+  }
+  .org-select option { background: var(--mbs-blu); }
+
+  /* Albero organigramma */
+  .org-tree-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 28px 24px;
+    backdrop-filter: blur(6px);
+    min-height: 240px;
+    overflow-x: auto;
+  }
+
+  .org-tree-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .org-node-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .org-node-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    position: relative;
+  }
+
+  /* Linee di connessione verticali/orizzontali */
+  .org-connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: 32px;
+  }
+  .org-connector-line-v {
+    width: 2px;
+    background: var(--accento-border);
+    flex: 1;
+    min-height: 12px;
+  }
+  .org-connector-line-h {
+    height: 2px;
+    width: 32px;
+    background: var(--accento-border);
+    margin-top: 20px;
+    flex-shrink: 0;
+  }
+  .org-connector-corner {
+    width: 2px;
+    background: var(--accento-border);
+    height: 22px;
+    flex-shrink: 0;
+  }
+  .org-connector-h-only {
+    height: 2px;
+    width: 32px;
+    background: var(--accento-border);
+    margin-top: 20px;
+  }
+
+  /* Nodo */
+  .org-node {
+    display: inline-flex;
+    flex-direction: column;
+    background: rgba(8,35,91,0.6);
+    border: 1px solid var(--accento-border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    min-width: 160px;
+    max-width: 220px;
+    position: relative;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    cursor: default;
+    margin: 4px 0;
+  }
+  .org-node:hover {
+    border-color: var(--accento);
+    box-shadow: 0 4px 18px rgba(179,69,140,0.18);
+  }
+  .org-node.org-node-root {
+    border-color: var(--accento);
+    background: rgba(179,69,140,0.12);
+  }
+  .org-node-nome {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--testo-chiaro);
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .org-node-ruolo {
+    font-size: 0.72rem;
+    color: var(--accento);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 8px;
+  }
+  .org-node-actions {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+  .org-node-btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.12);
+    color: var(--testo-muted);
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-size: 0.68rem;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .org-node-btn:hover { color: var(--testo-chiaro); border-color: var(--accento-border); background: var(--accento-light); }
+  .org-node-btn.danger { color: var(--danger); border-color: rgba(224,85,85,0.25); }
+  .org-node-btn.danger:hover { background: rgba(224,85,85,0.1); border-color: var(--danger); }
+
+  /* Figli: rientro + linee */
+  .org-children {
+    display: flex;
+    flex-direction: column;
+    padding-left: 52px;
+    border-left: 2px solid var(--accento-border);
+    margin-left: 16px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    gap: 0;
+    position: relative;
+  }
+
+  .org-child-item {
+    position: relative;
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+
+  .org-child-item::before {
+    content: '';
+    position: absolute;
+    left: -52px;
+    top: 24px;
+    width: 50px;
+    height: 2px;
+    background: var(--accento-border);
+  }
+
+  /* Edit inline nella form */
+  .org-edit-notice {
+    background: var(--accento-light);
+    border: 1px solid var(--accento-border);
+    border-radius: 7px;
+    padding: 8px 12px;
+    font-size: 0.75rem;
+    color: var(--accento);
+    margin-bottom: 14px;
+    display: none;
+    align-items: center;
+    gap: 8px;
+  }
+  .org-edit-notice.show { display: flex; }
+
+  .org-edit-cancel {
+    background: none;
+    border: none;
+    color: var(--accento);
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-left: auto;
+    padding: 0 3px;
+    font-family: inherit;
+  }
   .auth-modal-footer { display: flex; justify-content: flex-end; gap: 10px; }
 </style>
 </head>
@@ -2246,6 +2631,7 @@
   <button class="nav-btn" onclick="showPage('debriefing')" id="nav-debriefing">Debriefing</button>
   <button class="nav-btn" onclick="showPage('statistiche')" id="nav-statistiche">Statistiche</button>
   <button class="nav-btn" onclick="showPage('inventario')" id="nav-inventario">Inventario</button>
+  <button class="nav-btn" onclick="showPage('organigramma')" id="nav-organigramma">Organigramma</button>
   <div class="edition-badge" id="navbar-edition">—</div>
   <div class="nav-user-badge" id="nav-user-badge" style="display:none;"></div>
   <button class="nav-btn-admin" id="nav-admin-btn" onclick="showPage('admin')" style="display:none;">&#9881; Admin</button>
@@ -2396,6 +2782,11 @@
         <div class="home-nav-card-icon">&#128230;</div>
         <div class="home-nav-card-title">Inventario</div>
         <div class="home-nav-card-desc">Elenco materiali con giacenze minime e stato scorte</div>
+      </div>
+      <div class="home-nav-card" onclick="showPage('organigramma')">
+        <div class="home-nav-card-icon">&#128101;</div>
+        <div class="home-nav-card-title">Organigramma</div>
+        <div class="home-nav-card-desc">Struttura gerarchica del team: ruoli, riporti e relazioni</div>
       </div>
     </div>
   </div>
@@ -2618,6 +3009,60 @@
   </div>
 </div>
 
+<!-- ===== PAGE ORGANIGRAMMA ===== -->
+<div class="page" id="page-organigramma">
+  <div class="section-wrap">
+    <div class="section-header">
+      <div>
+        <div class="section-title">&#128101; <span>Organigramma</span></div>
+        <div class="section-subtitle">Struttura gerarchica del team — aggiungi, modifica e riorganizza le persone</div>
+      </div>
+    </div>
+
+    <div class="org-layout">
+      <!-- Form di aggiunta/modifica -->
+      <div class="org-form-card">
+        <div class="org-form-title">Aggiungi persona</div>
+
+        <div class="org-edit-notice" id="org-edit-notice">
+          <span>Modifica in corso</span>
+          <button class="org-edit-cancel" onclick="orgCancelEdit()" title="Annulla modifica">&#10005;</button>
+        </div>
+
+        <input type="hidden" id="org-edit-id">
+
+        <div class="org-field">
+          <label class="org-label" for="org-nome">Nome e cognome</label>
+          <input class="org-input" type="text" id="org-nome" placeholder="Es. Mario Rossi"
+            onkeydown="if(event.key==='Enter')orgSalva()">
+        </div>
+
+        <div class="org-field">
+          <label class="org-label" for="org-ruolo">Ruolo / Titolo</label>
+          <input class="org-input" type="text" id="org-ruolo" placeholder="Es. Direttore Commerciale"
+            onkeydown="if(event.key==='Enter')orgSalva()">
+        </div>
+
+        <div class="org-field">
+          <label class="org-label" for="org-parent">Riporta a</label>
+          <select class="org-select" id="org-parent">
+            <option value="">— Vertice (nessun superiore) —</option>
+          </select>
+        </div>
+
+        <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:6px;" onclick="orgSalva()">
+          Salva persona
+        </button>
+      </div>
+
+      <!-- Albero gerarchico -->
+      <div class="org-tree-card" id="org-tree-card">
+        <div id="org-tree-container"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ===== FIREBASE ===== -->
 <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore-compat.js"></script>
@@ -2657,7 +3102,8 @@ let state = {
   corsi: [],
   statisticheObiettivi: [],
   regoleSconto: {},
-  pmList: []
+  pmList: [],
+  organigramma: []
 };
 
 // ===== UTILITY =====
@@ -2697,6 +3143,7 @@ async function load() {
   if (!state.regoleSconto) state.regoleSconto = {};
   if (!state.pmList) state.pmList = [];
   if (!state.corsi) state.corsi = [];
+  if (!state.organigramma) state.organigramma = [];
   // ===== MIGRAZIONE: consolida nomi iscritti in persone[] delle aziende =====
   migratePersoneFromIscritti();
 }
@@ -2766,6 +3213,7 @@ function showPage(name) {
   if (name === 'inventario') renderInventario();
   if (name === 'home') { renderRegoleSconto(); renderPMManager(); }
   if (name === 'storico') renderIncassoPerEdizione();
+  if (name === 'organigramma') renderOrganigramma();
   window.scrollTo(0, 0);
 }
 
@@ -4754,14 +5202,29 @@ function renderStatistiche() {
     return ca < cb ? -1 : ca > cb ? 1 : 0;
   });
 
-  let html = `<div class="section-wrap">
-    <div class="section-header">
-      <div>
-        <div class="section-title">&#128200; Statistiche <span>&amp; Obiettivi</span></div>
-        <div class="section-subtitle">Traccia statistiche e obiettivi per ogni persona — andamento nel tempo</div>
-      </div>
-      <button class="btn btn-outline" onclick="syncStatistiche();renderStatistiche();toast('Lista aggiornata')">&#8635; Aggiorna lista persone</button>
-    </div>`;
+  const _mgrOptions = lista.map(p =>
+    '<option value="' + p.id + '">' + escHtml((p.cognome || '') + ' ' + (p.nome || '')) + (p.azienda ? ' — ' + escHtml(p.azienda) : '') + '</option>'
+  ).join('');
+
+  let html = '<div class="section-wrap">'
+    + '<div class="section-header">'
+    + '<div>'
+    + '<div class="section-title">&#128200; Statistiche <span>&amp; Obiettivi</span></div>'
+    + '<div class="section-subtitle">Traccia statistiche e obiettivi per ogni persona &#8212; andamento nel tempo</div>'
+    + '</div>'
+    + '<button class="btn btn-outline" onclick="syncStatistiche();renderStatistiche();toast(\'Lista aggiornata\')">&#8635; Aggiorna lista persone</button>'
+    + '</div>'
+    + '<div class="stat-grafico-panel">'
+    + '<div class="stat-grafico-panel-title">&#128200; Grafico Mensile per Persona</div>'
+    + '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;">'
+    + '<div style="font-size:0.72rem;color:var(--testo-muted);text-transform:uppercase;letter-spacing:0.1em;">Persona:</div>'
+    + '<select id="grafico-mgr-sel" class="td-select" style="min-width:260px;" onchange="renderGraficoMensile()">'
+    + '<option value="">— Seleziona persona —</option>'
+    + _mgrOptions
+    + '</select>'
+    + '</div>'
+    + '<div id="grafico-mensile-container"><div style="font-size:0.82rem;color:var(--testo-muted);font-style:italic;">Seleziona una persona per visualizzare il grafico mensile delle statistiche.</div></div>'
+    + '</div>';
 
   if (lista.length === 0) {
     html += `<div class="empty-state"><div class="empty-state-icon">&#128200;</div><div class="empty-state-text">Nessuna persona trovata. Aggiungi iscritti per popolare le statistiche.</div></div>`;
@@ -4838,8 +5301,12 @@ function renderStatistiche() {
     });
   }
 
-  html += `</div>`;
+  html += '</div>';
   document.getElementById('page-statistiche').innerHTML = html;
+  // Ripristina selezione manager e disegna grafico
+  const _mgrSelEl = document.getElementById('grafico-mgr-sel');
+  if (_mgrSelEl && _graficoMgrId) { _mgrSelEl.value = _graficoMgrId; }
+  renderGraficoMensile();
 }
 
 function addStatistica(personaId) {
@@ -4852,7 +5319,8 @@ function addStatistica(personaId) {
     tipo: 'numero',
     obiettivoPersonale: '',
     obiettivoTitolare: '',
-    periodi: []
+    periodi: [],
+    valoriMensili: {}
   });
   save();
   renderStatistiche();
@@ -4914,6 +5382,469 @@ function removePeriodo(personaId, si, pi) {
   persona.statistiche[si].periodi.splice(pi, 1);
   save();
   renderStatistiche();
+}
+
+// ===== GRAFICO MENSILE PER MANAGER =====
+
+const GRAFICO_ANNO_COLORS = [
+  '#b3458c', '#3dbf8a', '#d4a843', '#5b9bd5',
+  '#e08055', '#7c5cbf', '#4ab8c4', '#e0e0e0'
+];
+
+// Stato UI grafico (non persistito)
+var _graficoMgrId = '';
+var _graficoAnnoSel = {};   // statId -> anno corrente in editing
+var _graficoAnniAttivi = {}; // statId -> { anno: bool }
+
+function renderGraficoMensile() {
+  var sel = document.getElementById('grafico-mgr-sel');
+  if (!sel) return;
+  _graficoMgrId = sel.value;
+
+  var container = document.getElementById('grafico-mensile-container');
+  if (!container) return;
+
+  if (!_graficoMgrId) {
+    container.innerHTML = '<div style="font-size:0.82rem;color:var(--testo-muted);font-style:italic;padding:8px 0;">Seleziona una persona per visualizzare il grafico mensile delle statistiche.</div>';
+    return;
+  }
+
+  var persona = (state.statisticheObiettivi || []).find(function(p) { return p.id === _graficoMgrId; });
+  if (!persona) { container.innerHTML = ''; return; }
+
+  var statNumeriche = (persona.statistiche || []).filter(function(s) {
+    return s.tipo === 'numero' || s.tipo === 'percentuale';
+  });
+
+  if (statNumeriche.length === 0) {
+    container.innerHTML = '<div style="font-size:0.82rem;color:var(--testo-muted);font-style:italic;padding:8px 0;">Nessuna statistica numerica configurata per questa persona. Aggiungila nella sezione qui sotto.</div>';
+    return;
+  }
+
+  var MESI_BREVI = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
+  var annoCorr = String(new Date().getFullYear());
+
+  var html = '';
+  statNumeriche.forEach(function(stat) {
+    var statId = stat.id;
+    var vm = stat.valoriMensili || {};
+    var anniDisp = Object.keys(vm).sort();
+
+    // Anno in editing
+    if (!_graficoAnnoSel[statId] || anniDisp.length === 0) {
+      _graficoAnnoSel[statId] = anniDisp.length > 0 ? anniDisp[anniDisp.length - 1] : annoCorr;
+    }
+    var annoSel = _graficoAnnoSel[statId];
+    if (anniDisp.length > 0 && !anniDisp.includes(annoSel)) {
+      annoSel = anniDisp[anniDisp.length - 1];
+      _graficoAnnoSel[statId] = annoSel;
+    }
+
+    // Inizializza anni attivi
+    if (!_graficoAnniAttivi[statId]) {
+      _graficoAnniAttivi[statId] = {};
+    }
+    anniDisp.forEach(function(a) {
+      if (_graficoAnniAttivi[statId][a] === undefined) {
+        _graficoAnniAttivi[statId][a] = true;
+      }
+    });
+
+    // Mappa colori
+    var colorMap = {};
+    anniDisp.forEach(function(a, i) {
+      colorMap[a] = GRAFICO_ANNO_COLORS[i % GRAFICO_ANNO_COLORS.length];
+    });
+
+    // Input 12 mesi per l'anno selezionato
+    var valoriAnno = vm[annoSel] || {};
+    var mesiHtml = MESI_BREVI.map(function(m, i) {
+      var mese = i + 1;
+      var val = (valoriAnno[mese] !== undefined && valoriAnno[mese] !== '') ? valoriAnno[mese] : '';
+      return '<div class="stat-mese-cell">'
+        + '<div class="stat-mese-lbl">' + m + '</div>'
+        + '<input class="stat-mese-inp" type="number" step="any" placeholder="—" value="' + escHtml(String(val)) + '"'
+        + ' onchange="updateValoreMensile(\'' + escHtml(persona.id) + '\',\'' + escHtml(statId) + '\',\'' + escHtml(annoSel) + '\',' + mese + ',this.value)">'
+        + '</div>';
+    }).join('');
+
+    // Selezione anno per editing
+    var annoSelHtml = anniDisp.map(function(a) {
+      return '<option value="' + escHtml(a) + '"' + (a === annoSel ? ' selected' : '') + '>' + escHtml(a) + '</option>';
+    }).join('');
+
+    // Pills anni (checkbox visibilità nel grafico)
+    var anniPillsHtml = anniDisp.length > 0
+      ? anniDisp.map(function(a, i) {
+          var attivo = _graficoAnniAttivi[statId][a] !== false;
+          var colore = colorMap[a] || '#b3458c';
+          return '<span class="stat-anno-pill' + (attivo ? ' attivo' : '') + '"'
+            + ' onclick="toggleAnnoGrafico(\'' + escHtml(persona.id) + '\',\'' + escHtml(statId) + '\',\'' + escHtml(a) + '\')">'
+            + '<span class="stat-anno-dot-sm" style="background:' + colore + ';"></span>'
+            + escHtml(a)
+            + '</span>';
+        }).join('')
+      : '';
+
+    // Incremento % tra gli ultimi due anni con dati
+    var anniConDati = anniDisp.filter(function(a) {
+      return _graficoAnniAttivi[statId][a] !== false && vm[a] && Object.keys(vm[a]).length > 0;
+    });
+    var incrHtml = '';
+    if (anniConDati.length >= 2) {
+      var aLast = anniConDati[anniConDati.length - 1];
+      var aPrev = anniConDati[anniConDati.length - 2];
+      var sumL = 0, sumP = 0;
+      for (var mk = 1; mk <= 12; mk++) {
+        var vl = parseFloat((vm[aLast] || {})[mk]); if (!isNaN(vl)) sumL += vl;
+        var vp = parseFloat((vm[aPrev] || {})[mk]); if (!isNaN(vp)) sumP += vp;
+      }
+      if (sumP !== 0) {
+        var pct = ((sumL - sumP) / Math.abs(sumP) * 100).toFixed(1);
+        var cls = parseFloat(pct) >= 0 ? 'stat-incr-pos' : 'stat-incr-neg';
+        var sign = parseFloat(pct) >= 0 ? '+' : '';
+        incrHtml = '<div class="stat-incr-row">Variazione totale annua '
+          + escHtml(aPrev) + ' &#8594; ' + escHtml(aLast)
+          + ': <span class="' + cls + '">' + sign + pct + '%</span></div>';
+      }
+    }
+
+    var unita = stat.tipo === 'percentuale' ? '%' : '';
+
+    html += '<div class="stat-grafico-card">'
+      + '<div class="stat-grafico-card-hdr">&#128200; ' + escHtml(stat.nome || '(statistica senza nome)')
+      + '<span style="font-size:0.7rem;color:var(--testo-muted);font-weight:400;">' + (unita ? 'percentuale (%)' : 'numero') + '</span>'
+      + '</div>'
+      // Riga selezione anno e aggiunta nuovo anno
+      + '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;">'
+      + '<span style="font-size:0.7rem;color:var(--testo-muted);text-transform:uppercase;letter-spacing:0.08em;">Anno dati:</span>'
+      + (anniDisp.length > 0
+          ? '<select class="td-select" style="min-width:90px;" onchange="cambiaAnnoEditGrafico(\'' + escHtml(persona.id) + '\',\'' + escHtml(statId) + '\',this.value)">' + annoSelHtml + '</select>'
+          : '')
+      + '<input type="number" min="1900" max="2100" step="1" class="td-input" style="width:88px;" placeholder="' + annoCorr + '"'
+      + ' title="Inserisci un anno e premi Invio per aggiungerlo"'
+      + ' onkeydown="if(event.key===\'Enter\'){aggiungiAnnoGrafico(\'' + escHtml(persona.id) + '\',\'' + escHtml(statId) + '\',this.value);this.value=\'\';}"'
+      + ' onblur="if(this.value.trim()!==\'\'){aggiungiAnnoGrafico(\'' + escHtml(persona.id) + '\',\'' + escHtml(statId) + '\',this.value);this.value=\'\';}">'
+      + '<span style="font-size:0.7rem;color:var(--testo-muted);">&#8592; Aggiungi anno</span>'
+      + '</div>'
+      // Griglia 12 mesi
+      + '<div class="stat-mesi-grid">' + mesiHtml + '</div>'
+      // Pill anni attivi (toggle linee grafico)
+      + (anniDisp.length > 0
+          ? '<div style="font-size:0.7rem;color:var(--testo-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Mostra nel grafico:</div>'
+            + '<div class="stat-anni-ckbs">' + anniPillsHtml + '</div>'
+            + '<div class="stat-canvas-wrap" id="cwrap-' + escHtml(statId) + '">'
+            + '<canvas id="cvas-' + escHtml(statId) + '" height="220"></canvas>'
+            + '<div class="stat-tooltip" id="tip-' + escHtml(statId) + '"></div>'
+            + '</div>'
+            + incrHtml
+          : '<div style="font-size:0.78rem;color:var(--testo-muted);font-style:italic;padding:8px 0;">Nessun anno ancora aggiunto. Inserisci un anno nel campo qui sopra e premi Invio.</div>')
+      + '</div>';
+  });
+
+  container.innerHTML = html;
+
+  // Disegna grafici dopo che il DOM e' aggiornato
+  statNumeriche.forEach(function(stat) {
+    var statId = stat.id;
+    var vm = stat.valoriMensili || {};
+    var anniDisp = Object.keys(vm).sort();
+    if (anniDisp.length === 0) return;
+    var colorMap = {};
+    anniDisp.forEach(function(a, i) { colorMap[a] = GRAFICO_ANNO_COLORS[i % GRAFICO_ANNO_COLORS.length]; });
+    var anniAttivi = anniDisp.filter(function(a) { return _graficoAnniAttivi[statId] && _graficoAnniAttivi[statId][a] !== false; });
+    var unita = stat.tipo === 'percentuale' ? '%' : '';
+    disegnaGraficoMensile('cvas-' + statId, 'tip-' + statId, vm, anniAttivi, colorMap, unita);
+  });
+}
+
+function updateValoreMensile(personaId, statId, anno, mese, val) {
+  var persona = (state.statisticheObiettivi || []).find(function(p) { return p.id === personaId; });
+  if (!persona) return;
+  var stat = (persona.statistiche || []).find(function(s) { return s.id === statId; });
+  if (!stat) return;
+  if (!stat.valoriMensili) stat.valoriMensili = {};
+  if (!stat.valoriMensili[anno]) stat.valoriMensili[anno] = {};
+  var trimmed = (val === '' || val === null || val === undefined) ? '' : String(val).trim();
+  if (trimmed === '') {
+    delete stat.valoriMensili[anno][mese];
+  } else {
+    stat.valoriMensili[anno][mese] = trimmed;
+  }
+  save();
+  // Ridisegna senza full re-render
+  var vm = stat.valoriMensili;
+  var anniDisp = Object.keys(vm).sort();
+  var colorMap = {};
+  anniDisp.forEach(function(a, i) { colorMap[a] = GRAFICO_ANNO_COLORS[i % GRAFICO_ANNO_COLORS.length]; });
+  var anniAttivi = anniDisp.filter(function(a) { return _graficoAnniAttivi[statId] && _graficoAnniAttivi[statId][a] !== false; });
+  var unita = stat.tipo === 'percentuale' ? '%' : '';
+  disegnaGraficoMensile('cvas-' + statId, 'tip-' + statId, vm, anniAttivi, colorMap, unita);
+}
+
+function aggiungiAnnoGrafico(personaId, statId, annoStr) {
+  var anno = String(parseInt(annoStr));
+  if (!anno || anno === 'NaN') return;
+  var persona = (state.statisticheObiettivi || []).find(function(p) { return p.id === personaId; });
+  if (!persona) return;
+  var stat = (persona.statistiche || []).find(function(s) { return s.id === statId; });
+  if (!stat) return;
+  if (!stat.valoriMensili) stat.valoriMensili = {};
+  if (!stat.valoriMensili[anno]) stat.valoriMensili[anno] = {};
+  _graficoAnnoSel[statId] = anno;
+  if (!_graficoAnniAttivi[statId]) _graficoAnniAttivi[statId] = {};
+  if (_graficoAnniAttivi[statId][anno] === undefined) _graficoAnniAttivi[statId][anno] = true;
+  save();
+  renderGraficoMensile();
+}
+
+function cambiaAnnoEditGrafico(personaId, statId, anno) {
+  _graficoAnnoSel[statId] = anno;
+  renderGraficoMensile();
+}
+
+function toggleAnnoGrafico(personaId, statId, anno) {
+  if (!_graficoAnniAttivi[statId]) _graficoAnniAttivi[statId] = {};
+  var corrente = _graficoAnniAttivi[statId][anno] !== false;
+  // Non spegnere se e' l'unico anno attivo
+  var anniAttiviOra = Object.keys(_graficoAnniAttivi[statId]).filter(function(a) {
+    return _graficoAnniAttivi[statId][a] !== false;
+  });
+  if (corrente && anniAttiviOra.length <= 1) return;
+  _graficoAnniAttivi[statId][anno] = !corrente;
+  // Re-render del contenitore grafico per aggiornare pill e canvas
+  renderGraficoMensile();
+}
+
+// Converte sequenza di punti in segmenti Bezier cubici (Catmull-Rom)
+function catmullRomSegs(pts, tension) {
+  var t = (tension !== undefined) ? tension : 0.4;
+  var segs = [];
+  if (pts.length < 2) return segs;
+  for (var i = 0; i < pts.length - 1; i++) {
+    var p0 = pts[Math.max(0, i - 1)];
+    var p1 = pts[i];
+    var p2 = pts[i + 1];
+    var p3 = pts[Math.min(pts.length - 1, i + 2)];
+    segs.push({
+      x0: p1.x, y0: p1.y,
+      x1: p2.x, y1: p2.y,
+      cpx1: p1.x + (p2.x - p0.x) * t,
+      cpy1: p1.y + (p2.y - p0.y) * t,
+      cpx2: p2.x - (p3.x - p1.x) * t,
+      cpy2: p2.y - (p3.y - p1.y) * t
+    });
+  }
+  return segs;
+}
+
+function hexToRgba(hex, alpha) {
+  var r = parseInt(hex.slice(1, 3), 16);
+  var g = parseInt(hex.slice(3, 5), 16);
+  var b = parseInt(hex.slice(5, 7), 16);
+  return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+}
+
+function disegnaGraficoMensile(canvasId, tooltipId, valoriMensili, anniAttivi, colorMap, unita) {
+  var canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+
+  var W = canvas.offsetWidth || 600;
+  var H = 220;
+  canvas.width = W;
+  canvas.height = H;
+
+  var ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, W, H);
+
+  var MESI_BREVI = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
+  var MESI_LUNGHI = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno',
+                     'Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+
+  var pL = 52, pR = 20, pT = 20, pB = 36;
+  var cW = W - pL - pR;
+  var cH = H - pT - pB;
+
+  // Raccoglie tutti i valori numerici per il range Y
+  var allVals = [];
+  anniAttivi.forEach(function(anno) {
+    var vm = valoriMensili[anno] || {};
+    for (var m = 1; m <= 12; m++) {
+      var v = parseFloat(vm[m]);
+      if (!isNaN(v)) allVals.push(v);
+    }
+  });
+
+  if (allVals.length === 0) {
+    ctx.fillStyle = '#8fa8b8';
+    ctx.font = '13px Segoe UI, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Nessun valore inserito per gli anni selezionati.', W / 2, H / 2);
+    return;
+  }
+
+  var maxVal = Math.max.apply(null, allVals);
+  var minVal = Math.min.apply(null, allVals);
+  // Margine estetico 5%
+  var margin = (maxVal - minVal) * 0.08 || Math.abs(maxVal) * 0.08 || 1;
+  maxVal += margin;
+  minVal -= margin;
+  var range = maxVal - minVal || 1;
+
+  function toX(m) { return pL + ((m - 1) / 11) * cW; }
+  function toY(v) { return pT + cH - ((v - minVal) / range) * cH; }
+
+  // Griglia asse Y
+  var steps = 5;
+  ctx.lineWidth = 1;
+  for (var s = 0; s <= steps; s++) {
+    var v = minVal + (s / steps) * range;
+    var y = toY(v);
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.beginPath();
+    ctx.moveTo(pL, y);
+    ctx.lineTo(W - pR, y);
+    ctx.stroke();
+    var label = Math.abs(v) >= 1000
+      ? (v / 1000).toFixed(1) + 'k'
+      : (Number.isInteger(Math.round(v * 10) / 10) ? Math.round(v) : v.toFixed(1));
+    ctx.fillStyle = '#8fa8b8';
+    ctx.font = '10px Segoe UI, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(label + (unita || ''), pL - 4, y + 3.5);
+  }
+
+  // Etichette asse X (mesi)
+  ctx.fillStyle = '#8fa8b8';
+  ctx.font = '9px Segoe UI, sans-serif';
+  ctx.textAlign = 'center';
+  MESI_BREVI.forEach(function(m, i) {
+    ctx.fillText(m, toX(i + 1), H - pB + 13);
+  });
+
+  // Punti per tooltip
+  var tooltipPts = [];
+
+  // Disegna una linea per ogni anno attivo
+  anniAttivi.forEach(function(anno) {
+    var vm = valoriMensili[anno] || {};
+    var colore = colorMap[anno] || '#b3458c';
+
+    // Raccoglie punti con valore valido
+    var pts = [];
+    for (var m = 1; m <= 12; m++) {
+      var v = parseFloat(vm[m]);
+      if (!isNaN(v)) {
+        pts.push({ x: toX(m), y: toY(v), m: m, v: v, anno: anno });
+      }
+    }
+    if (pts.length === 0) return;
+
+    pts.forEach(function(p) { tooltipPts.push(p); });
+
+    if (pts.length === 1) {
+      // Punto isolato
+      ctx.fillStyle = colore;
+      ctx.beginPath();
+      ctx.arc(pts[0].x, pts[0].y, 4, 0, Math.PI * 2);
+      ctx.fill();
+      return;
+    }
+
+    // Fill sotto la curva (opacità molto bassa)
+    var segsF = catmullRomSegs(pts);
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, pT + cH);
+    ctx.lineTo(pts[0].x, pts[0].y);
+    segsF.forEach(function(seg) {
+      ctx.bezierCurveTo(seg.cpx1, seg.cpy1, seg.cpx2, seg.cpy2, seg.x1, seg.y1);
+    });
+    ctx.lineTo(pts[pts.length - 1].x, pT + cH);
+    ctx.closePath();
+    ctx.fillStyle = hexToRgba(colore, 0.07);
+    ctx.fill();
+
+    // Linea spline Catmull-Rom
+    var segs = catmullRomSegs(pts);
+    ctx.beginPath();
+    ctx.moveTo(segs[0].x0, segs[0].y0);
+    segs.forEach(function(seg) {
+      ctx.bezierCurveTo(seg.cpx1, seg.cpy1, seg.cpx2, seg.cpy2, seg.x1, seg.y1);
+    });
+    ctx.strokeStyle = colore;
+    ctx.lineWidth = 2.5;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    // Punti dati
+    pts.forEach(function(p) {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 3.5, 0, Math.PI * 2);
+      ctx.fillStyle = colore;
+      ctx.fill();
+      ctx.strokeStyle = hexToRgba('#08235b', 0.8);
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    });
+  });
+
+  // Legenda anni (in alto a destra)
+  var legsAnni = anniAttivi.slice().reverse();
+  legsAnni.forEach(function(anno, i) {
+    var colore = colorMap[anno] || '#b3458c';
+    var legX = W - pR;
+    var legY = pT + 14 + i * 16;
+    ctx.fillStyle = colore;
+    ctx.fillRect(legX - 22, legY - 6, 14, 3);
+    ctx.font = 'bold 10px Segoe UI, sans-serif';
+    ctx.fillStyle = '#8fa8b8';
+    ctx.textAlign = 'right';
+    ctx.fillText(anno, legX - 27, legY - 3);
+  });
+
+  // Tooltip
+  var tooltipEl = document.getElementById(tooltipId);
+  var wrapEl = canvas.parentElement;
+  if (!tooltipEl || !wrapEl) return;
+
+  // Rimuovi listener precedenti
+  if (canvas._statTipMove) canvas.removeEventListener('mousemove', canvas._statTipMove);
+  if (canvas._statTipLeave) canvas.removeEventListener('mouseleave', canvas._statTipLeave);
+
+  canvas._statTipMove = function(e) {
+    var rect = canvas.getBoundingClientRect();
+    var scaleX = canvas.width / rect.width;
+    var scaleY = canvas.height / rect.height;
+    var mx = (e.clientX - rect.left) * scaleX;
+    var my = (e.clientY - rect.top) * scaleY;
+
+    var nearest = null;
+    var minDist = 28 * scaleX;
+    tooltipPts.forEach(function(p) {
+      var d = Math.sqrt(Math.pow(p.x - mx, 2) + Math.pow(p.y - my, 2));
+      if (d < minDist) { minDist = d; nearest = p; }
+    });
+
+    if (nearest) {
+      tooltipEl.textContent = nearest.anno + ' — ' + MESI_LUNGHI[nearest.m - 1] + ': ' + nearest.v + (unita || '');
+      // Posizione relativa al canvas-wrap
+      var relX = (nearest.x / canvas.width) * rect.width;
+      var relY = (nearest.y / canvas.height) * rect.height;
+      tooltipEl.style.left = relX + 'px';
+      tooltipEl.style.top = (relY - 10) + 'px';
+      tooltipEl.classList.add('vis');
+    } else {
+      tooltipEl.classList.remove('vis');
+    }
+  };
+
+  canvas._statTipLeave = function() {
+    tooltipEl.classList.remove('vis');
+  };
+
+  canvas.addEventListener('mousemove', canvas._statTipMove);
+  canvas.addEventListener('mouseleave', canvas._statTipLeave);
 }
 
 // ===== INVENTARIO =====
@@ -5987,6 +6918,210 @@ window.addEventListener('DOMContentLoaded', async function() {
   await load();
   avviaSessione();
 });
+
+// ===== ORGANIGRAMMA =====
+
+function renderOrganigramma() {
+  populateOrgParentSelect(null);
+  renderOrgTree();
+}
+
+function populateOrgParentSelect(editingId) {
+  const sel = document.getElementById('org-parent');
+  if (!sel) return;
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">— Vertice (nessun superiore) —</option>';
+  (state.organigramma || []).forEach(function(n) {
+    if (n.id === editingId) return; // non mostrare sé stesso
+    const opt = document.createElement('option');
+    opt.value = n.id;
+    opt.textContent = n.nome + (n.ruolo ? ' (' + n.ruolo + ')' : '');
+    sel.appendChild(opt);
+  });
+  if (prev) sel.value = prev;
+}
+
+function renderOrgTree() {
+  const container = document.getElementById('org-tree-container');
+  if (!container) return;
+  const nodes = state.organigramma || [];
+  if (nodes.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#128101;</div><div class="empty-state-text">Nessuna persona nell\'organigramma. Aggiungi la prima persona dal form.</div></div>';
+    return;
+  }
+  // Trova le radici
+  const roots = nodes.filter(function(n) { return !n.parentId; });
+  container.innerHTML = '';
+  const wrap = document.createElement('div');
+  wrap.className = 'org-tree-wrap';
+  roots.forEach(function(root) {
+    wrap.appendChild(buildOrgNode(root, nodes, true));
+  });
+  container.appendChild(wrap);
+}
+
+function buildOrgNode(node, allNodes, isRoot) {
+  const children = allNodes.filter(function(n) { return n.parentId === node.id; });
+
+  const wrapper = document.createElement('div');
+  wrapper.style.marginBottom = children.length > 0 ? '0' : '0';
+
+  // Nodo principale
+  const nodeEl = document.createElement('div');
+  nodeEl.className = 'org-node' + (isRoot && !node.parentId ? ' org-node-root' : '');
+
+  const nomeEl = document.createElement('div');
+  nomeEl.className = 'org-node-nome';
+  nomeEl.textContent = node.nome;
+
+  const ruoloEl = document.createElement('div');
+  ruoloEl.className = 'org-node-ruolo';
+  ruoloEl.textContent = node.ruolo || '—';
+
+  const actionsEl = document.createElement('div');
+  actionsEl.className = 'org-node-actions';
+
+  const btnEdit = document.createElement('button');
+  btnEdit.className = 'org-node-btn';
+  btnEdit.textContent = 'Modifica';
+  btnEdit.onclick = (function(id) { return function() { orgModifica(id); }; })(node.id);
+
+  const btnDel = document.createElement('button');
+  btnDel.className = 'org-node-btn danger';
+  btnDel.textContent = 'Rimuovi';
+  btnDel.onclick = (function(id) { return function() { orgElimina(id); }; })(node.id);
+
+  actionsEl.appendChild(btnEdit);
+  actionsEl.appendChild(btnDel);
+
+  nodeEl.appendChild(nomeEl);
+  nodeEl.appendChild(ruoloEl);
+  nodeEl.appendChild(actionsEl);
+  wrapper.appendChild(nodeEl);
+
+  // Figli
+  if (children.length > 0) {
+    const childrenWrap = document.createElement('div');
+    childrenWrap.className = 'org-children';
+    children.forEach(function(child) {
+      const childItem = document.createElement('div');
+      childItem.className = 'org-child-item';
+      childItem.appendChild(buildOrgNode(child, allNodes, false));
+      childrenWrap.appendChild(childItem);
+    });
+    wrapper.appendChild(childrenWrap);
+  }
+
+  return wrapper;
+}
+
+function orgSalva() {
+  const nome = (document.getElementById('org-nome').value || '').trim();
+  const ruolo = (document.getElementById('org-ruolo').value || '').trim();
+  const parentId = document.getElementById('org-parent').value || null;
+  const editId = document.getElementById('org-edit-id').value || null;
+
+  if (!nome) { showToast('Inserisci il nome della persona.'); return; }
+
+  if (!state.organigramma) state.organigramma = [];
+
+  if (editId) {
+    // Modifica nodo esistente
+    const idx = state.organigramma.findIndex(function(n) { return n.id === editId; });
+    if (idx !== -1) {
+      // Verifica che il nuovo parent non sia un discendente del nodo stesso
+      if (parentId && isDescendant(editId, parentId, state.organigramma)) {
+        showToast('Impossibile spostare una persona sotto un suo subordinato.');
+        return;
+      }
+      state.organigramma[idx].nome = nome;
+      state.organigramma[idx].ruolo = ruolo;
+      state.organigramma[idx].parentId = parentId || null;
+    }
+    orgCancelEdit();
+    showToast('Persona aggiornata.');
+  } else {
+    // Nuovo nodo
+    state.organigramma.push({
+      id: uid(),
+      nome: nome,
+      ruolo: ruolo,
+      parentId: parentId || null
+    });
+    document.getElementById('org-nome').value = '';
+    document.getElementById('org-ruolo').value = '';
+    document.getElementById('org-parent').value = '';
+    showToast('Persona aggiunta all\'organigramma.');
+  }
+
+  save();
+  renderOrganigramma();
+}
+
+function orgModifica(id) {
+  const node = (state.organigramma || []).find(function(n) { return n.id === id; });
+  if (!node) return;
+  document.getElementById('org-nome').value = node.nome;
+  document.getElementById('org-ruolo').value = node.ruolo || '';
+  document.getElementById('org-edit-id').value = id;
+  populateOrgParentSelect(id);
+  document.getElementById('org-parent').value = node.parentId || '';
+  const notice = document.getElementById('org-edit-notice');
+  if (notice) {
+    notice.querySelector('span').textContent = 'Modifica in corso: ' + node.nome;
+    notice.classList.add('show');
+  }
+  document.getElementById('org-nome').focus();
+  window.scrollTo(0, document.getElementById('page-organigramma').offsetTop);
+}
+
+function orgCancelEdit() {
+  document.getElementById('org-nome').value = '';
+  document.getElementById('org-ruolo').value = '';
+  document.getElementById('org-edit-id').value = '';
+  document.getElementById('org-parent').value = '';
+  const notice = document.getElementById('org-edit-notice');
+  if (notice) notice.classList.remove('show');
+  populateOrgParentSelect(null);
+}
+
+function orgElimina(id) {
+  if (!state.organigramma) return;
+  const node = state.organigramma.find(function(n) { return n.id === id; });
+  if (!node) return;
+
+  const children = state.organigramma.filter(function(n) { return n.parentId === id; });
+
+  if (children.length > 0) {
+    const conf = confirm(
+      'La persona "' + node.nome + '" ha ' + children.length + ' subordinato/i diretti.\n\n' +
+      'Rimuovendo questa persona, i subordinati saranno promossi al livello superiore (riporteranno a chi riportava "' + node.nome + '").\n\n' +
+      'Confermi la rimozione?'
+    );
+    if (!conf) return;
+    // Promuovi i figli al livello del genitore rimosso
+    state.organigramma.forEach(function(n) {
+      if (n.parentId === id) {
+        n.parentId = node.parentId || null;
+      }
+    });
+  }
+
+  state.organigramma = state.organigramma.filter(function(n) { return n.id !== id; });
+  save();
+  showToast('Persona rimossa dall\'organigramma.');
+  renderOrganigramma();
+}
+
+// Verifica se targetId è discendente di startId nell'albero
+function isDescendant(startId, targetId, nodes) {
+  const children = nodes.filter(function(n) { return n.parentId === startId; });
+  for (let i = 0; i < children.length; i++) {
+    if (children[i].id === targetId) return true;
+    if (isDescendant(children[i].id, targetId, nodes)) return true;
+  }
+  return false;
+}
 </script>
 </body>
 </html>
