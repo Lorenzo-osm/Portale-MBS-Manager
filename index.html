@@ -5503,9 +5503,10 @@ function renderGraficoMensile() {
         var pct = ((sumL - sumP) / Math.abs(sumP) * 100).toFixed(1);
         var cls = parseFloat(pct) >= 0 ? 'stat-incr-pos' : 'stat-incr-neg';
         var sign = parseFloat(pct) >= 0 ? '+' : '';
+        var notaNeg = sumP < 0 ? ' <span style="font-size:0.68rem;color:var(--testo-muted);">(base negativa)</span>' : '';
         incrHtml = '<div class="stat-incr-row">Variazione totale annua '
           + escHtml(aPrev) + ' &#8594; ' + escHtml(aLast)
-          + ': <span class="' + cls + '">' + sign + pct + '%</span></div>';
+          + ': <span class="' + cls + '">' + sign + pct + '%</span>' + notaNeg + '</div>';
       }
     }
 
@@ -5683,9 +5684,11 @@ function disegnaGraficoMensile(canvasId, tooltipId, valoriMensili, anniAttivi, c
     return;
   }
 
-  var maxVal = Math.max.apply(null, allVals);
-  var minVal = Math.min.apply(null, allVals);
-  // Margine estetico 5%
+  var rawMin = Math.min.apply(null, allVals);
+  var rawMax = Math.max.apply(null, allVals);
+  var maxVal = rawMax;
+  var minVal = rawMin;
+  // Margine estetico 8% del range (mai toccare lo zero se è già nei dati)
   var margin = (maxVal - minVal) * 0.08 || Math.abs(maxVal) * 0.08 || 1;
   maxVal += margin;
   minVal -= margin;
@@ -5693,6 +5696,10 @@ function disegnaGraficoMensile(canvasId, tooltipId, valoriMensili, anniAttivi, c
 
   function toX(m) { return pL + ((m - 1) / 11) * cW; }
   function toY(v) { return pT + cH - ((v - minVal) / range) * cH; }
+
+  // Coordinata Y dello zero — clamped nel canvas, usata come baseline fill
+  var zeroY = Math.min(pT + cH, Math.max(pT, toY(0)));
+  var haNegativi = rawMin < 0;
 
   // Griglia asse Y
   var steps = 5;
@@ -5712,6 +5719,25 @@ function disegnaGraficoMensile(canvasId, tooltipId, valoriMensili, anniAttivi, c
     ctx.font = '10px Segoe UI, sans-serif';
     ctx.textAlign = 'right';
     ctx.fillText(label + (unita || ''), pL - 4, y + 3.5);
+  }
+
+  // Linea dello zero — visibile solo quando il range include valori negativi
+  if (haNegativi && zeroY > pT && zeroY < pT + cH) {
+    ctx.save();
+    ctx.setLineDash([5, 4]);
+    ctx.strokeStyle = 'rgba(255,255,255,0.28)';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(pL, zeroY);
+    ctx.lineTo(W - pR, zeroY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+    // Etichetta "0" più marcata
+    ctx.fillStyle = 'rgba(255,255,255,0.45)';
+    ctx.font = 'bold 10px Segoe UI, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText('0' + (unita || ''), pL - 4, zeroY + 3.5);
   }
 
   // Etichette asse X (mesi)
@@ -5751,15 +5777,15 @@ function disegnaGraficoMensile(canvasId, tooltipId, valoriMensili, anniAttivi, c
       return;
     }
 
-    // Fill sotto la curva (opacità molto bassa)
+    // Fill dalla linea dello zero alla curva (opacità molto bassa)
     var segsF = catmullRomSegs(pts);
     ctx.beginPath();
-    ctx.moveTo(pts[0].x, pT + cH);
+    ctx.moveTo(pts[0].x, zeroY);
     ctx.lineTo(pts[0].x, pts[0].y);
     segsF.forEach(function(seg) {
       ctx.bezierCurveTo(seg.cpx1, seg.cpy1, seg.cpx2, seg.cpy2, seg.x1, seg.y1);
     });
-    ctx.lineTo(pts[pts.length - 1].x, pT + cH);
+    ctx.lineTo(pts[pts.length - 1].x, zeroY);
     ctx.closePath();
     ctx.fillStyle = hexToRgba(colore, 0.07);
     ctx.fill();
