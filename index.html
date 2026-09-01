@@ -2644,7 +2644,7 @@
   <button class="nav-btn" onclick="showPage('statistiche')" id="nav-statistiche">Statistiche</button>
   <button class="nav-btn" onclick="showPage('inventario')" id="nav-inventario">Inventario</button>
   <button class="nav-btn" onclick="showPage('organigramma')" id="nav-organigramma">Organigramma</button>
-  <button class="nav-btn" onclick="esportaDati()" title="Esporta clienti e consulenti in JSON per il Wiki">&#8595; Esporta dati</button>
+  <button class="nav-btn" id="nav-btn-esporta" onclick="esportaDati()" title="Esporta clienti e consulenti in JSON per il Wiki" style="display:none;">&#8595; Esporta dati</button>
   <div class="edition-badge" id="navbar-edition">—</div>
   <div class="nav-user-badge" id="nav-user-badge" style="display:none;"></div>
   <button class="nav-btn-admin" id="nav-admin-btn" onclick="showPage('admin')" style="display:none;">&#9881; Admin</button>
@@ -6712,33 +6712,56 @@ function onFiltroIscrittiChange() {
 <script>
 // ============================================================
 // SISTEMA DI AUTENTICAZIONE — MBS MANAGER
-// Chiavi separate da Firebase; non toccano i dati Firestore.
+// Account (admin + users) salvati su Firestore: portali/mbs-manager-auth
+// Documento separato e indipendente dai dati portale (portali/mbs-manager)
+// sessionStorage usato solo per la sessione attiva (locale per dispositivo: corretto)
 // ============================================================
 
 const AUTH_KEYS = {
-  admin:   'mbsm_auth_admin',
-  users:   'mbsm_auth_users',
   session: 'mbsm_auth_session'
 };
 
-// Helpers storage
-function _aLs(k)      { try { const v = localStorage.getItem(k);   return v ? JSON.parse(v) : null; } catch(e) { return null; } }
-function _aLsSet(k,v) { localStorage.setItem(k, JSON.stringify(v)); }
+// Helpers sessionStorage (sessione locale per dispositivo: corretto)
 function _aSs(k)      { try { const v = sessionStorage.getItem(k); return v ? JSON.parse(v) : null; } catch(e) { return null; } }
 function _aSsSet(k,v) { sessionStorage.setItem(k, JSON.stringify(v)); }
 
-// ===== INIT STORAGE =====
-function initAuth() {
-  if (!_aLs(AUTH_KEYS.admin)) {
-    _aLsSet(AUTH_KEYS.admin, {
+// Cache in memoria degli account (caricati da Firestore)
+let _authAdmin = null;
+let _authUsers = [];
+
+// ===== CARICAMENTO AUTH DA FIRESTORE =====
+async function loadAuth() {
+  try {
+    const snap = await db.collection('portali').doc('mbs-manager-auth').get();
+    if (snap.exists) {
+      const data = snap.data();
+      _authAdmin = data.admin || null;
+      _authUsers = Array.isArray(data.users) ? data.users : [];
+    }
+  } catch(e) {
+    console.error('[MBS Manager Auth] Errore caricamento:', e);
+  }
+  // Inizializza admin di default se non esiste ancora su Firestore
+  if (!_authAdmin) {
+    _authAdmin = {
       email:    'l.gorgo@osmpartnerbologna.it',
       password: 'Dybalronaldo055!',
       nome:     'Lorenzo',
       cognome:  'Gorgò'
-    });
+    };
+    await _saveAuth();
   }
-  if (!_aLs(AUTH_KEYS.users)) {
-    _aLsSet(AUTH_KEYS.users, []);
+}
+
+// ===== SALVATAGGIO AUTH SU FIRESTORE =====
+async function _saveAuth() {
+  try {
+    await db.collection('portali').doc('mbs-manager-auth').set({
+      admin: _authAdmin,
+      users: _authUsers
+    });
+  } catch(e) {
+    console.error('[MBS Manager Auth] Errore salvataggio:', e);
   }
 }
 
@@ -6753,12 +6776,14 @@ async function doLogin() {
 
   if (!email || !password) { errEl.classList.add('show'); return; }
 
+  // Assicura che i dati auth siano caricati (es. primo accesso prima del DOMContentLoaded)
+  if (!_authAdmin) await loadAuth();
+
   // Controlla admin
-  const admin = _aLs(AUTH_KEYS.admin);
-  if (email === admin.email.toLowerCase() && password === admin.password) {
+  if (_authAdmin && email === _authAdmin.email.toLowerCase() && password === _authAdmin.password) {
     _aSsSet(AUTH_KEYS.session, {
-      ruolo: 'admin', email: admin.email,
-      nome: admin.nome, cognome: admin.cognome
+      ruolo: 'admin', email: _authAdmin.email,
+      nome: _authAdmin.nome, cognome: _authAdmin.cognome
     });
     await load();
     avviaSessione();
@@ -6766,8 +6791,7 @@ async function doLogin() {
   }
 
   // Controlla utenti PM / Consulente
-  const users = _aLs(AUTH_KEYS.users) || [];
-  const user  = users.find(u => u.email.toLowerCase() === email && u.password === password);
+  const user = _authUsers.find(u => u.email.toLowerCase() === email && u.password === password);
   if (user) {
     _aSsSet(AUTH_KEYS.session, {
       ruolo: user.ruolo, email: user.email,
@@ -6806,6 +6830,7 @@ function avviaSessione() {
   // Bottone Admin: solo per admin
   const adminBtn = document.getElementById('nav-admin-btn');
   if (adminBtn) adminBtn.style.display = sess.ruolo === 'admin' ? '' : 'none';
+  if (sess.ruolo === 'admin') document.getElementById('nav-btn-esporta').style.display = '';
 
   // Visibilità nav buttons per ruolo
   applyNavRole(sess.ruolo);
@@ -6929,7 +6954,7 @@ function renderAuthUsers() {
   const list  = document.getElementById('auth-users-list');
   const empty = document.getElementById('auth-users-empty');
   if (!list) return;
-  const users = _aLs(AUTH_KEYS.users) || [];
+  const users = _authUsers;
   list.innerHTML = '';
   if (users.length === 0) {
     if (empty) empty.style.display = '';
@@ -6953,8 +6978,7 @@ function renderAuthUsers() {
 let _authDeleteIdx = -1;
 
 function confirmDeleteUser(idx) {
-  const users = _aLs(AUTH_KEYS.users) || [];
-  const u = users[idx];
+  const u = _authUsers[idx];
   if (!u) return;
   _authDeleteIdx = idx;
   const msg = document.getElementById('auth-modal-msg');
@@ -6969,16 +6993,15 @@ function closeAuthModal() {
   _authDeleteIdx = -1;
 }
 
-function confirmDeleteUserExec() {
+async function confirmDeleteUserExec() {
   if (_authDeleteIdx < 0) return;
-  const users = _aLs(AUTH_KEYS.users) || [];
-  users.splice(_authDeleteIdx, 1);
-  _aLsSet(AUTH_KEYS.users, users);
+  _authUsers.splice(_authDeleteIdx, 1);
   closeAuthModal();
   renderAuthUsers();
+  await _saveAuth();
 }
 
-function addAuthUser() {
+async function addAuthUser() {
   const nome     = (document.getElementById('new-user-nome').value     || '').trim();
   const cognome  = (document.getElementById('new-user-cognome').value  || '').trim();
   const email    = (document.getElementById('new-user-email').value    || '').trim().toLowerCase();
@@ -6995,20 +7018,18 @@ function addAuthUser() {
     errEl.classList.add('show'); return;
   }
 
-  const admin = _aLs(AUTH_KEYS.admin);
-  if (email === admin.email.toLowerCase()) {
+  if (_authAdmin && email === _authAdmin.email.toLowerCase()) {
     errEl.textContent = 'Questa email è già usata dall\'account Admin.';
     errEl.classList.add('show'); return;
   }
 
-  const users = _aLs(AUTH_KEYS.users) || [];
-  if (users.some(u => u.email.toLowerCase() === email)) {
+  if (_authUsers.some(u => u.email.toLowerCase() === email)) {
     errEl.textContent = 'Questa email è già registrata.';
     errEl.classList.add('show'); return;
   }
 
-  users.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2), email, password, nome, cognome, ruolo });
-  _aLsSet(AUTH_KEYS.users, users);
+  _authUsers.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2), email, password, nome, cognome, ruolo });
+  await _saveAuth();
 
   ['new-user-nome','new-user-cognome','new-user-email','new-user-password'].forEach(id => {
     const el = document.getElementById(id);
@@ -7022,7 +7043,7 @@ function addAuthUser() {
   renderAuthUsers();
 }
 
-function saveAdminAccount() {
+async function saveAdminAccount() {
   const currentPwd = (document.getElementById('acc-pwd-current').value || '');
   const newEmail   = (document.getElementById('acc-email-new').value   || '').trim().toLowerCase();
   const newPwd     = (document.getElementById('acc-pwd-new').value     || '');
@@ -7032,9 +7053,7 @@ function saveAdminAccount() {
   errEl.classList.remove('show');
   okEl.classList.remove('show');
 
-  const admin = _aLs(AUTH_KEYS.admin);
-
-  if (currentPwd !== admin.password) {
+  if (!_authAdmin || currentPwd !== _authAdmin.password) {
     errEl.textContent = 'Password attuale non corretta.';
     errEl.classList.add('show'); return;
   }
@@ -7043,24 +7062,23 @@ function saveAdminAccount() {
     errEl.classList.add('show'); return;
   }
   if (newEmail) {
-    const users = _aLs(AUTH_KEYS.users) || [];
-    if (users.some(u => u.email.toLowerCase() === newEmail)) {
+    if (_authUsers.some(u => u.email.toLowerCase() === newEmail)) {
       errEl.textContent = 'Questa email è già usata da un altro account.';
       errEl.classList.add('show'); return;
     }
   }
 
-  if (newEmail) admin.email    = newEmail;
-  if (newPwd)   admin.password = newPwd;
-  _aLsSet(AUTH_KEYS.admin, admin);
+  if (newEmail) _authAdmin.email    = newEmail;
+  if (newPwd)   _authAdmin.password = newPwd;
+  await _saveAuth();
 
   // Aggiorna sessione corrente se necessario
   const sess = getAuthSession();
   if (sess && sess.ruolo === 'admin') {
-    if (newEmail) sess.email = admin.email;
+    if (newEmail) sess.email = _authAdmin.email;
     _aSsSet(AUTH_KEYS.session, sess);
     const badge = document.getElementById('nav-user-badge');
-    if (badge) badge.textContent = ((admin.nome || '') + ' ' + (admin.cognome || '')).trim() || admin.email;
+    if (badge) badge.textContent = ((_authAdmin.nome || '') + ' ' + (_authAdmin.cognome || '')).trim() || _authAdmin.email;
   }
 
   document.getElementById('acc-pwd-current').value = '';
@@ -7074,7 +7092,8 @@ function saveAdminAccount() {
 
 // ===== INIT — DOMContentLoaded =====
 window.addEventListener('DOMContentLoaded', async function() {
-  initAuth();
+  // Carica gli account da Firestore (sostituisce initAuth con localStorage)
+  await loadAuth();
 
   const sess = getAuthSession();
 
