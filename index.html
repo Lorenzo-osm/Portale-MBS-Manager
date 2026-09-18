@@ -4030,6 +4030,20 @@ function renderFirme() {
 }
 
 // ===== PAGE: REPORT PROGRAMMAZIONE =====
+
+// Cerca il supervisore assegnato al banco di uno studente nella disposizione dell'edizione data
+function getSupervisioneDaDisposizione(iscId, edition) {
+  const dispEd = (state.disposizioni || []).filter(d => d.edition === edition);
+  for (const disp of dispEd) {
+    const banco = (disp.banchi || []).find(b => b.clienteId === iscId);
+    if (banco && banco.supervisoreId) {
+      const sup = (disp.supervisori || []).find(s => s.id === banco.supervisoreId);
+      if (sup) return (sup.nome + ' ' + sup.cognome).trim();
+    }
+  }
+  return '';
+}
+
 function renderReport() {
   const edition = state.edition;
   const lbl1 = document.getElementById('report-edition-label');
@@ -4056,6 +4070,7 @@ function renderReport() {
 
   presenti.forEach((isc, idx) => {
     const gi = state.iscritti.indexOf(isc);
+    const supBanchi = getSupervisioneDaDisposizione(isc.id, edition);
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="report-num-cell">${idx + 1}</td>
@@ -4067,7 +4082,10 @@ function renderReport() {
       <td>${escHtml(isc.esercizio || '—')}</td>
       <td class="prog-cell">${escHtml(isc.programmazione || '—')}</td>
       <td>${escHtml(isc.corsoSuccessivo || '—')}</td>
-      <td><input type="text" style="width:100%;min-width:90px;background:transparent;border:none;border-bottom:1px solid #ddd;outline:none;font-size:0.84rem;padding:2px 4px;color:#1a1a1a;" value="${escHtml(isc.supervisoreG1 || '')}" placeholder="Sup. G1" onchange="updateIscritto(${gi},'supervisoreG1',this.value)"></td>
+      <td>
+        ${supBanchi ? `<div style="font-size:0.82rem;color:#333;margin-bottom:2px;">&#128205; ${escHtml(supBanchi)}</div>` : ''}
+        <input type="text" class="no-print" style="width:100%;min-width:90px;background:transparent;border:none;border-bottom:1px solid ${supBanchi ? 'rgba(179,69,140,0.3)' : '#ddd'};outline:none;font-size:0.8rem;padding:2px 4px;color:var(--testo-muted);" value="${escHtml(isc.supervisoreG1 || '')}" placeholder="${supBanchi ? 'Override manuale...' : 'Sup. G1'}" onchange="updateIscritto(${gi},'supervisoreG1',this.value)">
+      </td>
       <td><input type="text" style="width:100%;min-width:90px;background:transparent;border:none;border-bottom:1px solid #ddd;outline:none;font-size:0.84rem;padding:2px 4px;color:#1a1a1a;" value="${escHtml(isc.supervisoreG2 || '')}" placeholder="Sup. G2" onchange="updateIscritto(${gi},'supervisoreG2',this.value)"></td>`;
     tbody.appendChild(tr);
   });
@@ -5069,7 +5087,7 @@ function renderDebriefing() {
   // Costruisce righe tabella
   let rows = '';
   if (sorted.length === 0) {
-    rows = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--testo-muted);font-style:italic;">Nessuno studente. Aggiungi iscritti per popolare il debriefing.</td></tr>`;
+    rows = `<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--testo-muted);font-style:italic;">Nessuno studente. Aggiungi iscritti per popolare il debriefing.</td></tr>`;
   } else {
     sorted.forEach((d, idx) => {
       const key = ((d.nome || '').trim() + '|' + (d.cognome || '').trim() + '|' + (d.azienda || '').trim()).toLowerCase();
@@ -5093,10 +5111,19 @@ function renderDebriefing() {
 
       const nCorsi = (d.corsiTracciati || []).length;
 
+      // Supervisore dalla disposizione: cerca l'iscritto corrispondente nell'edizione selezionata
+      const _iscInEd = state.iscritti.find(i =>
+        i.edition === edizioneSelezionata &&
+        (i.nome || '').trim().toLowerCase() === (d.nome || '').trim().toLowerCase() &&
+        (i.cognome || '').trim().toLowerCase() === (d.cognome || '').trim().toLowerCase()
+      );
+      const _supDisp = _iscInEd ? getSupervisioneDaDisposizione(_iscInEd.id, edizioneSelezionata) : '';
+
       rows += `<tr style="${rowStyle}" id="dbrow-${idx}">
         <td style="font-weight:600;">${escHtml(d.cognome || '')}</td>
         <td>${escHtml(d.nome || '')}</td>
         <td style="font-size:0.78rem;color:var(--testo-muted);">${escHtml(d.azienda || '')}</td>
+        <td style="font-size:0.78rem;">${_supDisp ? escHtml(_supDisp) : '<span style="color:var(--testo-muted);">—</span>'}</td>
         <td style="color:var(--testo-muted);font-style:italic;font-size:0.8rem;max-width:200px;white-space:pre-wrap;">${notePrev}</td>
         <td>
           <textarea class="td-textarea db-note-ta" rows="2"
@@ -5156,6 +5183,7 @@ function renderDebriefing() {
             <th>Cognome</th>
             <th>Nome</th>
             <th>Azienda</th>
+            <th>Supervisore</th>
             <th>Note edizione precedente${edizionePrecedente ? ' <span style="font-weight:400;opacity:0.7;font-size:0.68rem;">(' + escHtml(edizionePrecedente) + ')</span>' : ''}</th>
             <th>Note edizione selezionata</th>
             <th>Corsi</th>
