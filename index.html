@@ -4084,9 +4084,8 @@ function renderReport() {
       <td>${escHtml(isc.corsoSuccessivo || '—')}</td>
       <td>
         ${supBanchi ? `<div style="font-size:0.82rem;color:#333;margin-bottom:2px;">&#128205; ${escHtml(supBanchi)}</div>` : ''}
-        <input type="text" class="no-print" style="width:100%;min-width:90px;background:transparent;border:none;border-bottom:1px solid ${supBanchi ? 'rgba(179,69,140,0.3)' : '#ddd'};outline:none;font-size:0.8rem;padding:2px 4px;color:var(--testo-muted);" value="${escHtml(isc.supervisoreG1 || '')}" placeholder="${supBanchi ? 'Override manuale...' : 'Sup. G1'}" onchange="updateIscritto(${gi},'supervisoreG1',this.value)">
-      </td>
-      <td><input type="text" style="width:100%;min-width:90px;background:transparent;border:none;border-bottom:1px solid #ddd;outline:none;font-size:0.84rem;padding:2px 4px;color:#1a1a1a;" value="${escHtml(isc.supervisoreG2 || '')}" placeholder="Sup. G2" onchange="updateIscritto(${gi},'supervisoreG2',this.value)"></td>`;
+        <input type="text" class="no-print" style="width:100%;min-width:90px;background:transparent;border:none;border-bottom:1px solid ${supBanchi ? 'rgba(179,69,140,0.3)' : '#ddd'};outline:none;font-size:0.8rem;padding:2px 4px;color:var(--testo-muted);" value="${escHtml(isc.supervisoreG1 || '')}" placeholder="${supBanchi ? 'Override manuale...' : 'Supervisore'}" onchange="updateIscritto(${gi},'supervisoreG1',this.value)">
+      </td>`;
     tbody.appendChild(tr);
   });
 }
@@ -4605,6 +4604,9 @@ function changeSchema(dispId, schema) {
   const disp = (state.disposizioni || []).find(d => d.id === dispId);
   if (!disp) return;
   if (!disp.customSchema && disp.schema === schema) return;
+  if ((disp.banchi || []).some(b => b.clienteId)) {
+    if (!confirm('Cambiando schema perderai tutte le assegnazioni attuali dei banchi. Continuare?')) return;
+  }
   disp.schema = schema;
   delete disp.customSchema;
   disp.banchi = buildBanchi(schema);
@@ -4616,6 +4618,9 @@ function changeSchema(dispId, schema) {
 function applyCustomSchema(dispId, customSchema) {
   const disp = (state.disposizioni || []).find(d => d.id === dispId);
   if (!disp) return;
+  if ((disp.banchi || []).some(b => b.clienteId)) {
+    if (!confirm('Applicando questo schema perderai tutte le assegnazioni attuali dei banchi. Continuare?')) return;
+  }
   disp.customSchema = customSchema;
   disp.banchi = buildBanchi(customSchema);
   save();
@@ -6199,8 +6204,7 @@ function printInventario() {
               <th>Esercizio</th>
               <th>Programmazione</th>
               <th>Corso Successivo</th>
-              <th>Supervisore G1</th>
-              <th>Supervisore G2</th>
+              <th>Supervisore</th>
             </tr>
           </thead>
           <tbody id="report-tbody"></tbody>
@@ -6402,7 +6406,7 @@ function getUltimaPresenza(nome, cognome, azienda, currentEdition) {
   (state.iscritti || []).forEach(i => {
     if (i.edition === currentEdition) return;
     if (i.nome !== nome || i.cognome !== cognome || i.azienda !== azienda) return;
-    const presente = i.presenza || i.presenzaG1 || i.presenzaG2;
+    const presente = i.presenza || i.presenzaG1;
     if (!presente) return;
     const idx = ordine.indexOf(i.edition);
     if (idx > lastIdx) { lastIdx = idx; lastEd = i.edition; }
@@ -6422,7 +6426,7 @@ function renderIncassoPerEdizione() {
   }
   const rows = edizioniConIscritti.map(ed => {
     const iscritti = (state.iscritti || []).filter(i => i.edition === ed);
-    const presentiList = iscritti.filter(i => i.presenza || i.presenzaG1 || i.presenzaG2);
+    const presentiList = iscritti.filter(i => i.presenza || i.presenzaG1);
     const incasso = presentiList.reduce((sum, isc) => sum + getQuotaEffettiva(isc), 0);
     const presenti = presentiList.length;
     return `<tr>
