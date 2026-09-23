@@ -1110,9 +1110,28 @@
     line-height: 1.5;
   }
 
-  table.report-table tbody tr:nth-child(even) td {
+  table.report-table tbody tr.report-row-alt td {
     background: #fdf5fa;
   }
+
+  table.report-table tbody tr.report-data-row td { border-bottom: none; }
+
+  table.report-table tbody tr.report-note-row td.report-note-full-cell {
+    padding: 2px 14px 12px 14px;
+    border-bottom: 1px solid #eee;
+  }
+
+  .report-note-label {
+    display: block;
+    font-size: 0.66rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--accento);
+    margin-bottom: 3px;
+  }
+
+  .report-note-row .report-note-textarea { width: 100%; min-height: 36px; }
 
   table.report-table tbody tr:hover td {
     background: #fceef6;
@@ -1498,8 +1517,10 @@
     body.print-report table.report-table td.prog-cell { max-width: 150px !important; font-size: 0.66rem !important; }
     body.print-report .report-header-block { background: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     body.print-report .report-note-textarea { display: none !important; }
-    body.print-report .report-note-print { display: block !important; white-space: pre-wrap; font-size: 0.66rem !important; color: #000 !important; min-height: 1em; }
-    body.print-report table.report-table td.report-note-cell { max-width: 140px !important; vertical-align: top !important; }
+    body.print-report .report-note-print { display: block !important; white-space: pre-wrap; font-size: 0.7rem !important; color: #000 !important; min-height: 1em; }
+    body.print-report .report-note-label { color: #000 !important; }
+    body.print-report tr.report-note-empty { display: none !important; }
+    body.print-report tr.report-note-row td.report-note-full-cell { background: #faf7f9 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
   }
 
@@ -4070,15 +4091,6 @@ function renderReport() {
   const empty = document.getElementById('report-empty');
   if (!tbody) return;
 
-  // Aggiunge intestazione Note se non già presente
-  const theadTr = tbody.closest('table') && tbody.closest('table').querySelector('thead tr');
-  if (theadTr && !theadTr.querySelector('th.report-note-th')) {
-    const th = document.createElement('th');
-    th.className = 'report-note-th';
-    th.textContent = 'Note';
-    theadTr.appendChild(th);
-  }
-
   // Solo presenti, ordinati per cognome
   const presenti = state.iscritti
     .filter(i => i.edition === edition && i.presenza)
@@ -4097,29 +4109,35 @@ function renderReport() {
     const supBanchi = getSupervisioneDaDisposizione(isc.id, edition);
     const noteKey = isc.id + '_' + edition;
     const noteVal = (state.reportNotes && state.reportNotes[noteKey]) ? state.reportNotes[noteKey] : '';
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td class="report-num-cell">${idx + 1}</td>
-      <td>${escHtml(isc.partner || '—')}</td>
-      <td>${escHtml(isc.consulente || '—')}</td>
-      <td><strong>${escHtml(((isc.nome || '') + ' ' + (isc.cognome || '')).trim() || '—')}</strong></td>
-      <td>${escHtml(isc.azienda || '—')}</td>
-      <td>${escHtml(isc.corso || '—')}</td>
-      <td>${escHtml(isc.esercizio || '—')}</td>
-      <td class="prog-cell">${escHtml(isc.programmazione || '—')}</td>
-      <td>${escHtml(isc.corsoSuccessivo || '—')}</td>
-      <td>
-        ${supBanchi ? `<div style="font-size:0.82rem;color:#333;margin-bottom:2px;">&#128205; ${escHtml(supBanchi)}</div>` : ''}
-        <input type="text" class="no-print" style="width:100%;min-width:90px;background:transparent;border:none;border-bottom:1px solid ${supBanchi ? 'rgba(179,69,140,0.3)' : '#ddd'};outline:none;font-size:0.8rem;padding:2px 4px;color:var(--testo-muted);" value="${escHtml(isc.supervisoreG1 || '')}" placeholder="${supBanchi ? 'Override manuale...' : 'Supervisore'}" onchange="updateIscritto(${gi},'supervisoreG1',this.value)">
-      </td>
-      <td class="report-note-cell">
-        <span class="report-note-print">${escHtml(noteVal)}</span>
-        <textarea class="td-textarea report-note-textarea" rows="2"
-          data-isc-id="${escHtml(isc.id)}"
-          data-edition="${escHtml(edition)}"
-          onchange="saveReportNote(this.dataset.iscId, this.dataset.edition, this.value)">${escHtml(noteVal)}</textarea>
-      </td>`;
-    tbody.appendChild(tr);
+    const rowClass = idx % 2 === 1 ? 'report-row-alt' : '';
+    const noteEmptyClass = noteVal ? '' : 'report-note-empty';
+    tbody.insertAdjacentHTML('beforeend', `
+      <tr class="report-data-row ${rowClass}">
+        <td class="report-num-cell">${idx + 1}</td>
+        <td>${escHtml(isc.partner || '—')}</td>
+        <td>${escHtml(isc.consulente || '—')}</td>
+        <td><strong>${escHtml(((isc.nome || '') + ' ' + (isc.cognome || '')).trim() || '—')}</strong></td>
+        <td>${escHtml(isc.azienda || '—')}</td>
+        <td>${escHtml(isc.corso || '—')}</td>
+        <td>${escHtml(isc.esercizio || '—')}</td>
+        <td class="prog-cell">${escHtml(isc.programmazione || '—')}</td>
+        <td>${escHtml(isc.corsoSuccessivo || '—')}</td>
+        <td>
+          ${supBanchi ? `<div style="font-size:0.82rem;color:#333;margin-bottom:2px;">&#128205; ${escHtml(supBanchi)}</div>` : ''}
+          <input type="text" class="no-print" style="width:100%;min-width:90px;background:transparent;border:none;border-bottom:1px solid ${supBanchi ? 'rgba(179,69,140,0.3)' : '#ddd'};outline:none;font-size:0.8rem;padding:2px 4px;color:var(--testo-muted);" value="${escHtml(isc.supervisoreG1 || '')}" placeholder="${supBanchi ? 'Override manuale...' : 'Supervisore'}" onchange="updateIscritto(${gi},'supervisoreG1',this.value)">
+        </td>
+      </tr>
+      <tr class="report-note-row ${rowClass} ${noteEmptyClass}">
+        <td class="report-note-full-cell" colspan="10">
+          <span class="report-note-label">Note</span>
+          <span class="report-note-print">${escHtml(noteVal)}</span>
+          <textarea class="td-textarea report-note-textarea" rows="2"
+            data-isc-id="${escHtml(isc.id)}"
+            data-edition="${escHtml(edition)}"
+            placeholder="Aggiungi una nota per questo cliente..."
+            onchange="saveReportNote(this.dataset.iscId, this.dataset.edition, this.value)">${escHtml(noteVal)}</textarea>
+        </td>
+      </tr>`);
   });
 }
 
