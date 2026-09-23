@@ -1497,6 +1497,9 @@
     body.print-report table.report-table td { color: #000 !important; padding: 6px 7px !important; font-size: 0.68rem !important; }
     body.print-report table.report-table td.prog-cell { max-width: 150px !important; font-size: 0.66rem !important; }
     body.print-report .report-header-block { background: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body.print-report .report-note-textarea { display: none !important; }
+    body.print-report .report-note-print { display: block !important; white-space: pre-wrap; font-size: 0.66rem !important; color: #000 !important; min-height: 1em; }
+    body.print-report table.report-table td.report-note-cell { max-width: 140px !important; vertical-align: top !important; }
 
   }
 
@@ -2031,6 +2034,7 @@
   }
 
   .inv-print-header { display: none; }
+  .report-note-print { display: none; }
 
   /* ===== MODALE TRASFERIMENTO CLIENTE ===== */
   .trasf-overlay {
@@ -3116,7 +3120,8 @@ let state = {
   statisticheObiettivi: [],
   regoleSconto: {},
   pmList: [],
-  organigramma: []
+  organigramma: [],
+  reportNotes: {}
 };
 
 // ===== UTILITY =====
@@ -3157,6 +3162,7 @@ async function load() {
   if (!state.pmList) state.pmList = [];
   if (!state.corsi) state.corsi = [];
   if (!state.organigramma) state.organigramma = [];
+  if (!state.reportNotes) state.reportNotes = {};
   // ===== MIGRAZIONE: consolida nomi iscritti in persone[] delle aziende =====
   migratePersoneFromIscritti();
 }
@@ -4031,6 +4037,12 @@ function renderFirme() {
 
 // ===== PAGE: REPORT PROGRAMMAZIONE =====
 
+function saveReportNote(iscId, edizione, valore) {
+  if (!state.reportNotes) state.reportNotes = {};
+  state.reportNotes[iscId + '_' + edizione] = valore;
+  save();
+}
+
 // Cerca il supervisore assegnato al banco di uno studente nella disposizione dell'edizione data
 function getSupervisioneDaDisposizione(iscId, edition) {
   const dispEd = (state.disposizioni || []).filter(d => d.edition === edition);
@@ -4055,6 +4067,15 @@ function renderReport() {
   const empty = document.getElementById('report-empty');
   if (!tbody) return;
 
+  // Aggiunge intestazione Note se non già presente
+  const theadTr = tbody.closest('table') && tbody.closest('table').querySelector('thead tr');
+  if (theadTr && !theadTr.querySelector('th.report-note-th')) {
+    const th = document.createElement('th');
+    th.className = 'report-note-th';
+    th.textContent = 'Note';
+    theadTr.appendChild(th);
+  }
+
   // Solo presenti, ordinati per cognome
   const presenti = state.iscritti
     .filter(i => i.edition === edition && i.presenza)
@@ -4071,6 +4092,8 @@ function renderReport() {
   presenti.forEach((isc, idx) => {
     const gi = state.iscritti.indexOf(isc);
     const supBanchi = getSupervisioneDaDisposizione(isc.id, edition);
+    const noteKey = isc.id + '_' + edition;
+    const noteVal = (state.reportNotes && state.reportNotes[noteKey]) ? state.reportNotes[noteKey] : '';
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="report-num-cell">${idx + 1}</td>
@@ -4085,6 +4108,13 @@ function renderReport() {
       <td>
         ${supBanchi ? `<div style="font-size:0.82rem;color:#333;margin-bottom:2px;">&#128205; ${escHtml(supBanchi)}</div>` : ''}
         <input type="text" class="no-print" style="width:100%;min-width:90px;background:transparent;border:none;border-bottom:1px solid ${supBanchi ? 'rgba(179,69,140,0.3)' : '#ddd'};outline:none;font-size:0.8rem;padding:2px 4px;color:var(--testo-muted);" value="${escHtml(isc.supervisoreG1 || '')}" placeholder="${supBanchi ? 'Override manuale...' : 'Supervisore'}" onchange="updateIscritto(${gi},'supervisoreG1',this.value)">
+      </td>
+      <td class="report-note-cell">
+        <span class="report-note-print">${escHtml(noteVal)}</span>
+        <textarea class="td-textarea report-note-textarea" rows="2"
+          data-isc-id="${escHtml(isc.id)}"
+          data-edition="${escHtml(edition)}"
+          onchange="saveReportNote(this.dataset.iscId, this.dataset.edition, this.value)">${escHtml(noteVal)}</textarea>
       </td>`;
     tbody.appendChild(tr);
   });
@@ -6888,7 +6918,7 @@ function doLogout() {
 // ===== VISIBILITA' NAV PER RUOLO =====
 function applyNavRole(ruolo) {
   if (ruolo !== 'consulente') return;
-  const permitted = ['iscritti', 'storico'];
+  const permitted = ['iscritti', 'storico', 'report'];
   document.querySelectorAll('nav.navbar button.nav-btn[id^="nav-"]').forEach(btn => {
     const pageName = btn.id.replace('nav-', '');
     btn.style.display = permitted.includes(pageName) ? '' : 'none';
@@ -6900,9 +6930,9 @@ const _origShowPage = window.showPage;
 window.showPage = function(pageName) {
   const sess = getAuthSession();
 
-  // Consulente: solo iscritti e storico
+  // Consulente: solo iscritti, storico e report
   if (sess && sess.ruolo === 'consulente') {
-    const permitted = ['iscritti', 'storico'];
+    const permitted = ['iscritti', 'storico', 'report'];
     if (!permitted.includes(pageName)) pageName = 'iscritti';
   }
 
