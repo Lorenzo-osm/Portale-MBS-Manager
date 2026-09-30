@@ -1779,6 +1779,438 @@
     }
   }
 
+  /* ===== BANCHI — GRAFICA SEZIONE, FOGLIO DI STAMPA E ASSEGNAZIONE SUPERVISORE ===== */
+  /* Blocco identico nei portali MBS Emilia, MBS Manager e Academy Beauty. */
+  :root { --bf-acc: var(--rosa, var(--accento, #b3468d)); }
+
+  .disp-step-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .disp-step-num {
+    flex: 0 0 auto;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--bf-acc);
+    color: #fff;
+    font-weight: 800;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .disp-step-title { font-size: 1rem; font-weight: 700; color: var(--testo-chiaro); }
+  .disp-step-hint { font-size: 0.76rem; color: var(--testo-muted); margin-top: 2px; line-height: 1.4; }
+
+  #disp-piantina-testa { margin-bottom: 14px; }
+
+  .disp-riepilogo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .disp-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: var(--testo-chiaro);
+  }
+
+  .disp-chip b { font-weight: 800; }
+  .disp-chip.ok { border-color: rgba(61,191,138,0.55); color: #7fe0b6; }
+  .disp-chip.attenzione { border-color: rgba(240,180,60,0.6); color: #f4c766; }
+  .disp-riepilogo-nomi { flex-basis: 100%; font-size: 0.74rem; color: var(--testo-muted); line-height: 1.5; }
+
+  /* Banco a schermo: fascia in alto con il colore del supervisore assegnato */
+  .disp-banco,
+  .disp-banco.has-cliente {
+    border-top: 4px solid var(--sup-col, rgba(255,255,255,0.10));
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  }
+
+  .disp-banco.sala-pratica { border-top-color: var(--sup-col, var(--bf-acc)) !important; }
+
+  .disp-banco:not(.has-cliente) {
+    border-left-style: dashed;
+    border-right-style: dashed;
+    border-bottom-style: dashed;
+    box-shadow: none;
+  }
+
+  .disp-banco-num { color: rgba(255,255,255,0.38); }
+
+  /* Tabella supervisori */
+  .disp-sup-table { border-collapse: collapse; }
+
+  .disp-sup-table th {
+    font-size: 0.7rem;
+    color: var(--bf-acc);
+    padding: 6px 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    text-align: left;
+    font-weight: 700;
+  }
+
+  .disp-sup-table tbody tr:hover td { background: rgba(255,255,255,0.03); }
+
+  .disp-sup-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    vertical-align: middle;
+  }
+
+  .disp-sup-count {
+    display: inline-block;
+    min-width: 28px;
+    text-align: center;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.08);
+    font-weight: 700;
+    font-size: 0.78rem;
+  }
+
+  .disp-sup-azioni { text-align: right; white-space: nowrap; }
+  .disp-sup-azioni .btn { padding: 6px 12px; font-size: 0.78rem; margin-left: 6px; }
+  .disp-btn-assegnazione { border-color: var(--bf-acc) !important; }
+  .disp-sup-empty { font-size: 0.8rem; color: var(--testo-muted); font-style: italic; padding: 8px 10px; }
+
+  /* Anteprima a schermo del foglio (piantina generale o assegnazione di un supervisore) */
+  #banchi-foglio-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+    background: rgba(8,10,18,0.95);
+    overflow: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .bf-barra {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    width: 100%;
+    max-width: 1120px;
+    color: #fff;
+  }
+
+  .bf-barra-titolo { flex: 1; font-size: 0.95rem; font-weight: 700; min-width: 160px; }
+  .bf-scala { flex: 0 0 auto; }
+
+  .bf-carta {
+    background: #fff;
+    padding: 8mm;
+    width: 297mm;
+    box-sizing: border-box;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    transform-origin: top left;
+  }
+
+  /* Foglio A4 orizzontale: l'intera aula sta sempre in una sola pagina */
+  .banchi-foglio {
+    width: 281mm;
+    height: 190mm;
+    box-sizing: border-box;
+    background: #fff;
+    color: #111;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5mm;
+    overflow: hidden;
+    font-family: Arial, Helvetica, sans-serif;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .bf-testata {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 6mm;
+    border-bottom: 0.6mm solid #111;
+    padding-bottom: 1.5mm;
+  }
+
+  .bf-sopra {
+    font-size: 8.5pt;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--bf-acc);
+    margin-bottom: 0.8mm;
+  }
+
+  .bf-titolo {
+    font-size: 20pt;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    line-height: 1.05;
+    color: #111;
+  }
+
+
+  .bf-destra {
+    flex: 0 0 auto;
+    text-align: right;
+    font-size: 9pt;
+    color: #444;
+    line-height: 1.35;
+    white-space: nowrap;
+  }
+
+  .bf-schermo {
+    flex: 0 0 auto;
+    align-self: center;
+    width: 50%;
+    text-align: center;
+    font-size: 8pt;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: #fff;
+    background: #222;
+    border-radius: 0.6mm;
+    padding: 0.8mm 0;
+  }
+
+  .bf-griglia {
+    flex: 1 1 0;
+    min-height: 0;
+    display: grid;
+    column-gap: 1.5mm;
+    row-gap: 2mm;
+  }
+
+  .bf-corridoio { background: #222; border-radius: 0.6mm; }
+
+  /* Banchi tutti uguali: la dimensione la decide la griglia, mai il contenuto */
+  .bf-banco {
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+    border: 0.3mm solid #999;
+    background: #f5f5f5;
+    border-radius: 1mm;
+    padding: 1.2mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.4mm;
+    font-size: var(--bf-fs, 8pt);
+    line-height: 1.15;
+    overflow-wrap: break-word;
+  }
+
+  .bf-banco.vuoto { background: #fff; border-style: dashed; border-color: #bbb; }
+  .bf-banco.sala { border: 0.7mm solid var(--bf-acc); }
+  .bf-nome { font-weight: 700; color: #000; }
+  .bf-corso, .bf-prossimo, .bf-sup-riga { font-size: 0.8em; }
+  .bf-corso { color: #333; }
+  .bf-prossimo { color: #666; font-style: italic; }
+  .bf-sup-riga { color: #555; }
+
+  .bf-corso, .bf-prossimo {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
+
+  /* Assegnazione: in risalto solo i clienti del supervisore, gli altri in secondo piano */
+  .banchi-foglio.assegnazione {
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    gap: 3mm;
+  }
+
+  /* Testata a fascia colorata: nome del supervisore, edizione e giorno, numero di clienti */
+  .assegnazione .bf-testata {
+    align-items: center;
+    background: var(--bf-acc);
+    border-bottom: none;
+    border-radius: 2.5mm;
+    padding: 3.5mm 5mm;
+  }
+
+  .assegnazione .bf-sopra { color: rgba(255,255,255,0.8); margin-bottom: 1mm; }
+
+  .bf-sup-nome {
+    font-size: 27pt;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.015em;
+    line-height: 1;
+    color: #fff;
+  }
+
+  .assegnazione .bf-destra {
+    display: flex;
+    align-items: center;
+    gap: 5mm;
+    color: #fff;
+  }
+
+  .bf-rif {
+    font-size: 12pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+  }
+
+  .bf-rif-sotto { font-size: 8.5pt; color: rgba(255,255,255,0.85); margin-top: 0.8mm; }
+
+  .bf-conta {
+    flex: 0 0 auto;
+    background: #fff;
+    color: var(--bf-acc);
+    border-radius: 2mm;
+    padding: 1.6mm 4mm;
+    text-align: center;
+    line-height: 1;
+  }
+
+  .bf-conta b { display: block; font-size: 20pt; font-weight: 800; }
+
+  .bf-conta span {
+    display: block;
+    font-size: 6.5pt;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 0.8mm;
+  }
+
+  .assegnazione .bf-schermo {
+    width: 40%;
+    background: #ececf0;
+    color: #55555f;
+    border-radius: 3mm;
+    font-size: 7pt;
+    padding: 1mm 0;
+  }
+
+  .assegnazione .bf-corridoio { background: #f0f0f4; }
+
+  .assegnazione .bf-banco { position: relative; border-radius: 2mm; padding: 1.6mm 2mm; }
+  .assegnazione .bf-banco.vuoto { background: #fff; border: 0.25mm dashed #dcdce2; }
+  .assegnazione .bf-banco.altro { background: #f7f7f9; border: 0.25mm solid #e6e6ec; }
+  .assegnazione .bf-banco.altro > div { color: #a9a9b3; font-weight: 400; }
+  .assegnazione .bf-banco.altro .bf-nome { color: #8d8d98; font-weight: 600; }
+
+  .assegnazione .bf-banco.mio {
+    background: #fbeaf4;
+    background: color-mix(in srgb, var(--bf-acc) 13%, #fff);
+    border: 0.5mm solid var(--bf-acc);
+    padding-left: 6.4mm;
+  }
+
+  .assegnazione .bf-banco.mio .bf-nome { font-size: 1.12em; font-weight: 800; color: #111; }
+  .assegnazione .bf-banco.mio .bf-corso { color: #222; }
+
+  /* Numero progressivo sui banchi del supervisore, nella fascia colorata a sinistra */
+  .bf-num {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 4.6mm;
+    background: var(--bf-acc);
+    color: #fff;
+    font-size: 9pt;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .bf-sala-tag {
+    font-size: 0.68em;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--bf-acc);
+  }
+
+  .bf-legenda {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 6mm;
+    font-size: 7.5pt;
+    color: #66666f;
+  }
+
+  .bf-legenda i {
+    display: inline-block;
+    box-sizing: border-box;
+    width: 3.4mm;
+    height: 3.4mm;
+    border-radius: 0.8mm;
+    vertical-align: -0.6mm;
+    margin-right: 1.5mm;
+  }
+
+  .bf-legenda .bf-leg-mio { background: color-mix(in srgb, var(--bf-acc) 13%, #fff); border: 0.4mm solid var(--bf-acc); border-left-width: 1.2mm; }
+  .bf-legenda .bf-leg-altro { background: #f7f7f9; border: 0.25mm solid #d6d6de; }
+  .bf-legenda .bf-leg-vuoto { border: 0.25mm dashed #c4c4cc; }
+  .bf-legenda .bf-leg-fine { margin-left: auto; }
+
+  @media print {
+    html.print-banchi, html.print-banchi body {
+      margin: 0 !important;
+      padding: 0 !important;
+      height: auto !important;
+      min-height: 0 !important;
+      background: #fff !important;
+      overflow: visible !important;
+    }
+
+    html.print-banchi body > *:not(#banchi-foglio-overlay) { display: none !important; }
+
+    html.print-banchi #banchi-foglio-overlay {
+      position: static !important;
+      display: block !important;
+      padding: 0 !important;
+      background: #fff !important;
+      overflow: visible !important;
+    }
+
+    html.print-banchi .bf-barra { display: none !important; }
+    html.print-banchi .bf-scala { width: auto !important; height: auto !important; }
+
+    html.print-banchi .bf-carta {
+      transform: none !important;
+      padding: 0 !important;
+      width: auto !important;
+      box-shadow: none !important;
+    }
+
+    html.print-banchi .banchi-foglio { break-inside: avoid; page-break-inside: avoid; }
+  }
+
   /* ===== PRINT — FOGLIETTINI (A4 portrait, 3×4 = 12 per foglio) ===== */
   @media print {
     @page { size: A4 portrait; margin: 8mm; }
@@ -4648,6 +5080,7 @@ function renderDisposizioni() {
     document.getElementById('disp-piantina').style.display = 'none';
     document.getElementById('disp-supervisori-section').style.display = 'none';
     document.getElementById('disp-schema-group').style.display = 'none';
+    renderDispRiepilogo(null);
     return;
   }
 
@@ -4914,6 +5347,8 @@ function buildBancoEl(banco, presenti, disp) {
   supSel.addEventListener('change', function() {
     banco.supervisoreId = this.value;
     save();
+    dispAggiornaBanchi(disp);
+    renderSupTable(disp);
   });
   el.appendChild(supSel);
 
@@ -5052,19 +5487,7 @@ function renderPiantina(disp) {
 
     colonneWrap.appendChild(colWrap);
   });
-}
-
-function renderSupTable(disp) {
-  const tbody = document.getElementById('disp-sup-tbody');
-  tbody.innerHTML = '';
-  (disp.supervisori || []).forEach(sup => {
-    const tr = document.createElement('tr');
-    tr.innerHTML =
-      '<td><input class="disp-sup-nome-input" value="' + escHtml(sup.nome) + '" onchange="updateSup(\'' + disp.id + '\',\'' + sup.id + '\',\'nome\',this.value)"></td>' +
-      '<td><input class="disp-sup-nome-input" value="' + escHtml(sup.cognome) + '" onchange="updateSup(\'' + disp.id + '\',\'' + sup.id + '\',\'cognome\',this.value)"></td>' +
-      '<td><button class="btn btn-danger" onclick="removeSup(\'' + disp.id + '\',\'' + sup.id + '\')">✕</button></td>';
-    tbody.appendChild(tr);
-  });
+  dispAggiornaBanchi(disp);
 }
 
 function updateSup(dispId, supId, field, val) {
@@ -5159,20 +5582,6 @@ function selectDisposizione(id) {
   renderDisposizioni();
 }
 
-function printDisposizione() {
-  const style = document.createElement('style');
-  style.id = 'print-orientation';
-  style.textContent = '@page { size: A4 landscape; margin: 8mm; }';
-  document.head.appendChild(style);
-  document.body.classList.add('print-disposizione');
-  window.print();
-  setTimeout(() => {
-    document.body.classList.remove('print-disposizione');
-    const s = document.getElementById('print-orientation');
-    if (s) s.remove();
-  }, 500);
-}
-
 // ===== FOGLIETTINI =====
 
 function renderFogliettini() {
@@ -5230,6 +5639,371 @@ function printFogliettini() {
 // ===== INIT =====
 
 // ===== DEBRIEFING =====
+// ===== BANCHI: SUPERVISORI, RIEPILOGO, FOGLIO DI STAMPA E ASSEGNAZIONE =====
+// Blocco identico nei portali MBS Emilia, MBS Manager e Academy Beauty.
+
+const DISP_SUP_COLORI = ['#4fc3f7', '#ffb74d', '#81c784', '#ba68c8', '#ff8a65', '#4dd0e1', '#fff176', '#f06292', '#a1887f', '#90a4ae'];
+
+function dispNomeProgetto() {
+  return (document.title.split('—')[0] || '').trim();
+}
+
+// Banchi della disposizione (nei portali a due giornate: quelli del giorno selezionato)
+function dispBanchiAttivi(disp) {
+  if (typeof getBanchiGiorno === 'function') return getBanchiGiorno(disp);
+  return disp.banchi || [];
+}
+
+function dispGiornoLabel(disp) {
+  if (typeof getBanchiGiorno !== 'function') return '';
+  return disp.giorno === 'G2' ? 'Secondo giorno' : 'Primo giorno';
+}
+
+function dispSupColore(disp, supId) {
+  const i = (disp.supervisori || []).findIndex(s => s.id === supId);
+  return i < 0 ? '' : DISP_SUP_COLORI[i % DISP_SUP_COLORI.length];
+}
+
+function dispSupNome(sup) {
+  return ((sup.nome || '') + ' ' + (sup.cognome || '')).trim();
+}
+
+// Banchi con seduto un cliente presente
+function dispBanchiOccupati(disp) {
+  const presenti = dispGetPresenti(disp);
+  return dispBanchiAttivi(disp).filter(b => b.clienteId && presenti.some(i => i.id === b.clienteId));
+}
+
+function renderSupTable(disp) {
+  const tbody = document.getElementById('disp-sup-tbody');
+  tbody.innerHTML = '';
+  const occupati = dispBanchiOccupati(disp);
+  (disp.supervisori || []).forEach(sup => {
+    const n = occupati.filter(b => b.supervisoreId === sup.id).length;
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td><span class="disp-sup-dot" style="background:' + dispSupColore(disp, sup.id) + ';"></span></td>' +
+      '<td><input class="disp-sup-nome-input" value="' + escHtml(sup.nome) + '" onchange="updateSup(\'' + disp.id + '\',\'' + sup.id + '\',\'nome\',this.value)"></td>' +
+      '<td><input class="disp-sup-nome-input" value="' + escHtml(sup.cognome) + '" onchange="updateSup(\'' + disp.id + '\',\'' + sup.id + '\',\'cognome\',this.value)"></td>' +
+      '<td><span class="disp-sup-count" title="Clienti assegnati">' + n + '</span></td>' +
+      '<td class="disp-sup-azioni">' +
+        '<button class="btn btn-outline disp-btn-assegnazione" onclick="apriAssegnazione(\'' + sup.id + '\')">Assegnazione</button>' +
+        '<button class="btn btn-danger" title="Elimina supervisore" onclick="removeSup(\'' + disp.id + '\',\'' + sup.id + '\')">✕</button>' +
+      '</td>';
+    tbody.appendChild(tr);
+  });
+  const vuoto = document.getElementById('disp-sup-empty');
+  if (vuoto) vuoto.style.display = (disp.supervisori || []).length ? 'none' : '';
+}
+
+// Riepilogo sopra la piantina: presenti, seduti, da sistemare, senza supervisore
+function renderDispRiepilogo(disp) {
+  const testa = document.getElementById('disp-piantina-testa');
+  const box = document.getElementById('disp-riepilogo');
+  if (!testa || !box) return;
+  if (!disp) { testa.style.display = 'none'; box.innerHTML = ''; return; }
+  testa.style.display = '';
+
+  const banchi = dispBanchiAttivi(disp);
+  const presenti = dispGetPresenti(disp);
+  const occupati = dispBanchiOccupati(disp);
+  const seduti = new Set(occupati.map(b => b.clienteId));
+  const daSistemare = presenti.filter(i => !seduti.has(i.id));
+  const senzaSup = occupati.filter(b => !(disp.supervisori || []).some(s => s.id === b.supervisoreId)).length;
+
+  let html =
+    '<span class="disp-chip">Presenti <b>' + presenti.length + '</b></span>' +
+    '<span class="disp-chip">Seduti <b>' + seduti.size + '</b></span>' +
+    '<span class="disp-chip">Banchi liberi <b>' + (banchi.length - occupati.length) + '</b></span>' +
+    (daSistemare.length
+      ? '<span class="disp-chip attenzione">Da sistemare <b>' + daSistemare.length + '</b></span>'
+      : '<span class="disp-chip ok">Tutti i presenti hanno un banco</span>') +
+    (senzaSup
+      ? '<span class="disp-chip attenzione">Senza supervisore <b>' + senzaSup + '</b></span>'
+      : (occupati.length ? '<span class="disp-chip ok">Tutti con supervisore</span>' : ''));
+  if (daSistemare.length) {
+    html += '<div class="disp-riepilogo-nomi">Da sistemare: ' +
+      daSistemare.map(i => escHtml(((i.nome || '') + ' ' + (i.cognome || '')).trim())).join(', ') + '</div>';
+  }
+  box.innerHTML = html;
+}
+
+// Da richiamare dopo ogni ridisegno della piantina o cambio di supervisore su un banco
+function dispAggiornaBanchi(disp) {
+  dispBanchiAttivi(disp).forEach(b => {
+    const el = document.getElementById('banco-' + b.id);
+    if (!el) return;
+    const c = dispSupColore(disp, b.supervisoreId);
+    if (c) el.style.setProperty('--sup-col', c);
+    else el.style.removeProperty('--sup-col');
+  });
+  renderDispRiepilogo(disp);
+}
+
+function dispFoglioEl(cls, testo) {
+  const el = document.createElement('div');
+  el.className = cls;
+  if (testo !== undefined) el.textContent = testo;
+  return el;
+}
+
+// Costruisce il foglio A4 orizzontale con l'intera aula.
+// Con supId evidenzia solo i clienti assegnati a quel supervisore (assegnazione).
+function dispCostruisciFoglio(disp, supId) {
+  const s = getSchemaFor(disp);
+  const banchi = dispBanchiAttivi(disp);
+  const presenti = dispGetPresenti(disp);
+  const supervisori = disp.supervisori || [];
+  const sup = supId ? supervisori.find(x => x.id === supId) : null;
+
+  const foglio = dispFoglioEl('banchi-foglio' + (sup ? ' assegnazione' : ''));
+
+  // Testata: mese/edizione di riferimento (e giorno), nome del supervisore in assegnazione
+  const giorno = dispGiornoLabel(disp);
+  const riferimento = 'Edizione ' + (disp.edition || dispCurrentEdition() || '—') + (giorno ? ' · ' + giorno : '');
+  const testata = dispFoglioEl('bf-testata');
+  const sx = dispFoglioEl('bf-sinistra');
+  const dx = dispFoglioEl('bf-destra');
+  if (sup) {
+    const miei = dispBanchiOccupati(disp).filter(b => b.supervisoreId === sup.id).length;
+    sx.appendChild(dispFoglioEl('bf-sopra', 'Assegnazione supervisore'));
+    sx.appendChild(dispFoglioEl('bf-sup-nome', dispSupNome(sup).toUpperCase()));
+    const dati = dispFoglioEl('');
+    dati.appendChild(dispFoglioEl('bf-rif', riferimento));
+    dati.appendChild(dispFoglioEl('bf-rif-sotto', dispNomeProgetto() + ' · Disposizione: ' + (disp.name || '')));
+    dx.appendChild(dati);
+    const conta = dispFoglioEl('bf-conta');
+    conta.innerHTML = '<b>' + miei + '</b><span>' + (miei === 1 ? 'cliente' : 'clienti') + '</span>';
+    dx.appendChild(conta);
+  } else {
+    sx.appendChild(dispFoglioEl('bf-sopra', dispNomeProgetto() + ' · Disposizione banchi'));
+    sx.appendChild(dispFoglioEl('bf-titolo', riferimento));
+    dx.appendChild(dispFoglioEl('', 'Disposizione: ' + (disp.name || '')));
+    dx.appendChild(dispFoglioEl('', 'Presenti: ' + presenti.length));
+  }
+  testata.appendChild(sx);
+  testata.appendChild(dx);
+  foglio.appendChild(testata);
+
+  foglio.appendChild(dispFoglioEl('bf-schermo', 'Schermo'));
+
+  const griglia = dispFoglioEl('bf-griglia');
+  foglio.appendChild(griglia);
+  if (!s) return foglio;
+
+  // Tracce della griglia: un posto = una traccia uguale, corridoio tra le colonne, stacco tra le coppie
+  const tracce = [];
+  const lineaPosto = [];
+  const corridoi = [];
+  let linea = 1;
+  let postiTot = 0;
+  s.colonne.forEach((n, col) => {
+    if (col > 0) { tracce.push('3.5mm'); corridoi.push(linea); linea++; }
+    let posti = s.coppie ? n * 2 : n;
+    for (let f = 0; f < s.file; f++) {
+      posti = Math.max(posti, banchi.filter(b => b.row === f && b.col === col).length);
+    }
+    lineaPosto[col] = [];
+    for (let p = 0; p < posti; p++) {
+      if (s.coppie && p > 0 && p % 2 === 0) { tracce.push('1.5mm'); linea++; }
+      lineaPosto[col][p] = linea;
+      tracce.push('minmax(0, 1fr)');
+      linea++;
+    }
+    postiTot += posti;
+  });
+  griglia.style.gridTemplateColumns = tracce.join(' ');
+  griglia.style.gridTemplateRows = 'repeat(' + s.file + ', minmax(0, 1fr))';
+
+  // Carattere proporzionato alla dimensione del banco
+  const largh = (281 - (s.colonne.length - 1) * 8 - postiTot * 1.5) / Math.max(postiTot, 1) - (sup ? 5 : 0);
+  const alt = ((sup ? 143 : 158) - s.file * 2) / Math.max(s.file, 1);
+  foglio.style.setProperty('--bf-fs', Math.max(5.5, Math.min(11, largh * 0.36, alt * 0.42)).toFixed(1) + 'pt');
+
+  corridoi.forEach(l => {
+    const c = dispFoglioEl('bf-corridoio');
+    c.style.gridColumn = String(l);
+    c.style.gridRow = '1 / -1';
+    griglia.appendChild(c);
+  });
+
+  // Assegnazione: numero progressivo dei banchi del supervisore, in ordine di lettura dalla prima fila
+  const numeroMio = {};
+  if (sup) {
+    dispBanchiOccupati(disp)
+      .filter(b => b.supervisoreId === sup.id)
+      .sort((a, b) => (a.row - b.row) || (a.col - b.col) || ((a.sub || 0) - (b.sub || 0)))
+      .forEach((b, i) => { numeroMio[b.id] = i + 1; });
+  }
+
+  s.colonne.forEach((n, col) => {
+    for (let f = 0; f < s.file; f++) {
+      banchi
+        .filter(b => b.row === f && b.col === col)
+        .sort((a, b) => (a.sub || 0) - (b.sub || 0))
+        .forEach((banco, p) => {
+          if (!lineaPosto[col][p]) return;
+          const isc = banco.clienteId ? presenti.find(i => i.id === banco.clienteId) : null;
+          const supBanco = supervisori.find(x => x.id === banco.supervisoreId);
+          let cls = 'bf-banco';
+          if (!isc) cls += ' vuoto';
+          else if (sup) cls += (banco.supervisoreId === sup.id ? ' mio' : ' altro');
+          if (banco.salaPratica && !cls.includes(' altro')) cls += ' sala';
+          const el = dispFoglioEl(cls);
+          el.style.gridColumn = String(lineaPosto[col][p]);
+          el.style.gridRow = String(f + 1);
+          if (isc) {
+            el.appendChild(dispFoglioEl('bf-nome', ((isc.nome || '') + ' ' + (isc.cognome || '')).trim()));
+            el.appendChild(dispFoglioEl('bf-corso', isc.corso || '—'));
+            if (isc.corsoSuccessivo) el.appendChild(dispFoglioEl('bf-prossimo', 'Prossimo: ' + isc.corsoSuccessivo));
+            if (numeroMio[banco.id]) {
+              // Banco del supervisore: numero progressivo al posto della riga "Sup:" (è già in testata)
+              el.appendChild(dispFoglioEl('bf-num', String(numeroMio[banco.id])));
+              if (banco.salaPratica) el.appendChild(dispFoglioEl('bf-sala-tag', 'Sala pratica'));
+            } else if (supBanco) {
+              el.appendChild(dispFoglioEl('bf-sup-riga', 'Sup: ' + dispSupNome(supBanco)));
+            }
+          }
+          griglia.appendChild(el);
+        });
+    }
+  });
+
+  if (sup) {
+    const legenda = dispFoglioEl('bf-legenda');
+    legenda.innerHTML =
+      '<span><i class="bf-leg-mio"></i>Clienti di ' + escHtml(dispSupNome(sup)) + '</span>' +
+      '<span><i class="bf-leg-altro"></i>Altri clienti</span>' +
+      '<span><i class="bf-leg-vuoto"></i>Banco libero</span>' +
+      '<span class="bf-leg-fine">' + escHtml(dispNomeProgetto()) + '</span>';
+    foglio.appendChild(legenda);
+  }
+
+  return foglio;
+}
+
+// Adatta l'anteprima del foglio alla finestra
+function dispScalaFoglio() {
+  const ov = document.getElementById('banchi-foglio-overlay');
+  if (!ov) return;
+  const carta = ov.querySelector('.bf-carta');
+  const scala = ov.querySelector('.bf-scala');
+  const barra = ov.querySelector('.bf-barra');
+  carta.style.transform = 'none';
+  const w = carta.offsetWidth;
+  const h = carta.offsetHeight;
+  const k = Math.max(0.3, Math.min(1.5, (window.innerWidth - 32) / w, (window.innerHeight - barra.offsetHeight - 46) / h));
+  carta.style.transform = 'scale(' + k + ')';
+  scala.style.width = (w * k) + 'px';
+  scala.style.height = (h * k) + 'px';
+}
+
+function dispFoglioEsc(e) {
+  if (e.key === 'Escape') dispChiudiFoglio();
+}
+
+function dispChiudiFoglio() {
+  const ov = document.getElementById('banchi-foglio-overlay');
+  if (ov) ov.remove();
+  window.removeEventListener('resize', dispScalaFoglio);
+  document.removeEventListener('keydown', dispFoglioEsc);
+}
+
+// Apre l'anteprima del foglio: piantina generale (supId vuoto) o assegnazione di un supervisore
+function dispApriFoglio(supId) {
+  const selEl = document.getElementById('disp-sel');
+  const disp = (state.disposizioni || []).find(d => d.id === (selEl ? selEl.value : ''));
+  if (!disp) { toast('Seleziona prima una disposizione'); return false; }
+  dispChiudiFoglio();
+
+  const ov = document.createElement('div');
+  ov.id = 'banchi-foglio-overlay';
+
+  const barra = dispFoglioEl('bf-barra');
+  barra.appendChild(dispFoglioEl('bf-barra-titolo', supId ? 'Assegnazione supervisore' : 'Piantina generale'));
+  const scelta = document.createElement('select');
+  scelta.className = 'disp-select';
+  scelta.title = 'Cambia vista';
+  scelta.innerHTML = '<option value="">Piantina generale</option>' +
+    (disp.supervisori || []).map(sv =>
+      '<option value="' + sv.id + '"' + (sv.id === supId ? ' selected' : '') + '>' + escHtml(dispSupNome(sv)) + '</option>').join('');
+  scelta.addEventListener('change', function() { dispApriFoglio(this.value); });
+  barra.appendChild(scelta);
+  const btnStampa = document.createElement('button');
+  btnStampa.className = 'btn btn-print';
+  btnStampa.textContent = '🖨️ Stampa';
+  btnStampa.addEventListener('click', function() { dispStampaFoglio(false); });
+  barra.appendChild(btnStampa);
+  const btnChiudi = document.createElement('button');
+  btnChiudi.className = 'btn btn-outline';
+  btnChiudi.textContent = '✕ Chiudi';
+  btnChiudi.addEventListener('click', dispChiudiFoglio);
+  barra.appendChild(btnChiudi);
+  ov.appendChild(barra);
+
+  const scala = dispFoglioEl('bf-scala');
+  const carta = dispFoglioEl('bf-carta');
+  carta.appendChild(dispCostruisciFoglio(disp, supId));
+  scala.appendChild(carta);
+  ov.appendChild(scala);
+
+  document.body.appendChild(ov);
+  dispScalaFoglio();
+  window.addEventListener('resize', dispScalaFoglio);
+  document.addEventListener('keydown', dispFoglioEsc);
+  return true;
+}
+
+function dispStampaFoglio(chiudiDopo) {
+  const style = document.createElement('style');
+  style.id = 'print-orientation';
+  style.textContent = '@page { size: A4 landscape; margin: 8mm; }';
+  document.head.appendChild(style);
+  document.documentElement.classList.add('print-banchi');
+  window.print();
+  setTimeout(() => {
+    document.documentElement.classList.remove('print-banchi');
+    const s = document.getElementById('print-orientation');
+    if (s) s.remove();
+    if (chiudiDopo) dispChiudiFoglio();
+  }, 500);
+}
+
+function apriAssegnazione(supId) {
+  dispApriFoglio(supId);
+}
+
+function printDisposizione() {
+  if (dispApriFoglio('')) dispStampaFoglio(true);
+}
+
+// ===== DEBRIEFING: IL RIDISEGNO NON AZZERA RICERCA E PANNELLI CORSI =====
+function debriefingRicordaVista() {
+  const pagina = document.getElementById('page-debriefing');
+  const cerca = document.getElementById('debriefing-search');
+  const attivo = document.activeElement;
+  return {
+    termine: cerca ? cerca.value : '',
+    aperti: Array.from(document.querySelectorAll('#debriefing-tbody [data-dbid]'))
+      .filter(p => p.style.display !== 'none').map(p => p.dataset.dbid),
+    fuoco: (attivo && attivo.id && attivo.id.indexOf('new-corso-nome-') === 0) ? attivo.id : '',
+    visibile: !!(pagina && pagina.offsetParent !== null),
+    scrollY: window.scrollY
+  };
+}
+
+function debriefingRipristinaVista(v) {
+  if (!v) return;
+  const cerca = document.getElementById('debriefing-search');
+  if (cerca && v.termine) { cerca.value = v.termine; filtraDebriefingRicerca(); }
+  document.querySelectorAll('#debriefing-tbody [data-dbid]').forEach(p => {
+    if (v.aperti.indexOf(p.dataset.dbid) !== -1) p.style.display = 'block';
+  });
+  if (!v.visibile) return;
+  if (v.fuoco) { const el = document.getElementById(v.fuoco); if (el) el.focus(); }
+  window.scrollTo(0, v.scrollY);
+}
+
 function syncDebriefing() {
   let changed = false;
   state.iscritti.forEach(isc => {
@@ -5271,6 +6045,8 @@ function filtraDebriefingRicerca() {
 }
 
 function renderDebriefing() {
+  // Ricorda ricerca, pannelli Corsi aperti e posizione: il ridisegno non deve azzerarli
+  const _dbVista = debriefingRicordaVista();
   const edizioneSelezionata = _debriefingEdizione || state.edition;
   _debriefingEdizione = edizioneSelezionata;
   const edizionePrecedente = getPrevEdizione(edizioneSelezionata);
@@ -5347,7 +6123,7 @@ function renderDebriefing() {
         </td>
         <td>
           <button class="btn btn-ghost" style="font-size:0.75rem;white-space:nowrap;" onclick="toggleCorsiPanel('dbcorsi-${idx}')">Corsi (${nCorsi})</button>
-          <div id="dbcorsi-${idx}" style="display:none;margin-top:8px;">
+          <div id="dbcorsi-${idx}" data-dbid="${d.id}" style="display:none;margin-top:8px;">
             ${renderCorsiPanel(d, idx, edizioneSelezionata)}
           </div>
         </td>
@@ -5410,6 +6186,7 @@ function renderDebriefing() {
 </div>`;
 
   document.getElementById('page-debriefing').innerHTML = html;
+  debriefingRipristinaVista(_dbVista);
 }
 
 function renderCorsiPanel(d, idx, edizioneSelezionata) {
@@ -6463,33 +7240,52 @@ function printInventario() {
       </div>
     </div>
 
+    <!-- Supervisori -->
+    <div class="disp-supervisori-block no-print" id="disp-supervisori-section" style="display:none;">
+      <div class="disp-step-head">
+        <span class="disp-step-num">1</span>
+        <div>
+          <div class="disp-step-title">Supervisori</div>
+          <div class="disp-step-hint">Inserisci i supervisori e assegnali ai banchi nella piantina qui sotto (puoi farlo anche dopo aver composto la piantina). Con «Assegnazione» vedi e stampi la piantina di ogni supervisore.</div>
+        </div>
+      </div>
+      <table class="disp-sup-table">
+        <thead>
+          <tr>
+            <th style="width:26px;"></th>
+            <th>Nome</th>
+            <th>Cognome</th>
+            <th style="width:80px;">Clienti</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="disp-sup-tbody"></tbody>
+      </table>
+      <div class="disp-sup-empty" id="disp-sup-empty">Nessun supervisore inserito.</div>
+      <div class="disp-add-sup-row">
+        <input type="text" id="disp-sup-nome-in" placeholder="Nome" onkeydown="if(event.key==='Enter')addSupervisore()">
+        <input type="text" id="disp-sup-cognome-in" placeholder="Cognome" onkeydown="if(event.key==='Enter')addSupervisore()">
+        <button class="btn btn-outline" style="padding:7px 14px;font-size:0.8rem;" onclick="addSupervisore()">+ Aggiungi supervisore</button>
+      </div>
+    </div>
+
     <!-- Piantina -->
     <div id="disp-piantina-wrap">
       <div class="empty-state" id="disp-empty">
         <div class="empty-state-icon">🪑</div>
         <div class="empty-state-text">Nessuna disposizione selezionata. Creane una nuova o selezionane una esistente.</div>
       </div>
-      <div id="disp-piantina" class="disp-piantina" style="display:none;"></div>
-    </div>
-
-    <!-- Supervisori -->
-    <div class="disp-supervisori-block no-print" id="disp-supervisori-section" style="display:none;">
-      <div class="section-title" style="font-size:1rem;margin-bottom:4px;">Supervisori</div>
-      <table class="disp-sup-table">
-        <thead>
-          <tr>
-            <th style="font-size:0.7rem;color:var(--accento);padding:6px 10px;text-transform:uppercase;letter-spacing:0.07em;">Nome</th>
-            <th style="font-size:0.7rem;color:var(--accento);padding:6px 10px;text-transform:uppercase;letter-spacing:0.07em;">Cognome</th>
-            <th style="width:50px;"></th>
-          </tr>
-        </thead>
-        <tbody id="disp-sup-tbody"></tbody>
-      </table>
-      <div class="disp-add-sup-row">
-        <input type="text" id="disp-sup-nome-in" placeholder="Nome">
-        <input type="text" id="disp-sup-cognome-in" placeholder="Cognome">
-        <button class="btn btn-outline" style="padding:7px 14px;font-size:0.8rem;" onclick="addSupervisore()">+ Aggiungi supervisore</button>
+      <div id="disp-piantina-testa" class="no-print" style="display:none;">
+        <div class="disp-step-head">
+          <span class="disp-step-num">2</span>
+          <div>
+            <div class="disp-step-title">Piantina dell'aula</div>
+            <div class="disp-step-hint">Scegli per ogni banco il cliente e il suo supervisore. La fascia colorata in alto al banco indica il supervisore assegnato.</div>
+          </div>
+        </div>
+        <div id="disp-riepilogo" class="disp-riepilogo"></div>
       </div>
+      <div id="disp-piantina" class="disp-piantina" style="display:none;"></div>
     </div>
   </div>
 </div>
