@@ -1558,6 +1558,9 @@
     body.print-report table.report-table tr { page-break-inside: avoid !important; break-inside: avoid !important; }
     body.print-report table.report-table tr.report-data-row { page-break-after: avoid !important; break-after: avoid !important; }
     body.print-report table.report-table tr.report-note-row { page-break-before: avoid !important; break-before: avoid !important; }
+    /* Riga e nota restano insieme solo se la nota c'è; la tabella non è dentro un riquadro a scorrimento, così parte subito sotto la testata */
+    body.print-report table.report-table tr.report-data-row:has(+ tr.report-note-empty) { page-break-after: auto !important; break-after: auto !important; }
+    body.print-report .report-wrap, body.print-report .report-wrap > div { overflow: visible !important; }
 
   }
 
