@@ -4770,6 +4770,19 @@ function saveReportNote(iscId, edizione, valore) {
   if (!state.reportNotes) state.reportNotes = {};
   state.reportNotes[iscId + '_' + edizione] = valore;
   save();
+  sincronizzaNoteStampa();
+}
+
+// Allinea la versione di stampa delle note a quello che è scritto nelle caselle:
+// senza questo, una nota appena scritta restava vuota (e nascosta) in stampa fino al ricaricamento della pagina.
+function sincronizzaNoteStampa() {
+  document.querySelectorAll('#report-tbody .report-note-textarea').forEach(ta => {
+    const riga = ta.closest('tr');
+    const stampa = riga ? riga.querySelector('.report-note-print') : null;
+    if (!stampa) return;
+    stampa.textContent = ta.value;
+    riga.classList.toggle('report-note-empty', !ta.value.trim());
+  });
 }
 
 // Cerca il supervisore assegnato al banco di uno studente nella disposizione dell'edizione data
@@ -5172,6 +5185,7 @@ function printFirme() {
 }
 
 function printReport() {
+  sincronizzaNoteStampa();
   const style = document.createElement('style');
   style.id = 'print-orientation';
   style.textContent = '@page { size: A4 landscape; margin: 10mm; }';
